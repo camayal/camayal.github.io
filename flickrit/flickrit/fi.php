@@ -1,1 +1,0 @@
-<?php function ddot($xa){return (base64_decode($xa));}?>
