@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+
+<html lang="en"> 
+
+<head>
+
+ 
+
+<link rel="canonical" href="http://camayal.info/scripts.htm" />
+
+
+
+ <LINK href="sections.css" rel="stylesheet" type="text/css">
+
+<style type="text/css">
+
+a[target="_blank"] {display:inline-block; padding-top:-20px; background:url(img/ex.png)  top right no-repeat;padding-right:12px;} 
+
+</style>
+
+
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+
+<meta name="revisit-after" content="30" />
+
+<meta name="robots" content="All" />
+
+<link rel="icon" type="image/png" href="img/camlfavicon.png">
+
+
+
+<title>List of scripts, small apps and minute software</title>
+
+<meta name="description" content="This is the list of some scripts coded by Carlos Alonso Maya Lastra, those can downloaded from the web" />
+
+<meta name="keywords" content="scripts, bioinformatics, botanist, euphorbiaceae, biological software" />
+
+
+
+</head>
+
+<body>
+
+<a href="https://plus.google.com/+camayal" rel="publisher"></a>
+
+<script>
+
+if (document.referrer != 'http://camayal.info/sitemap.html') {
+
+if (window.top==window.self)  {
+
+      location.href = '../#scripts';
+
+    } 
+
+
+
+}
+
+</script>
+
+
+
+<noscript><a href="/sitemap.html" id="nj" target="_top">Go back to the homepage</a></noscript>
+
+<p class="linknormal" id="old"></p>
+
+
+
+<h1>List of scripts, small apps and minute software</h1>
+
+Here is a short list of a variety of scripts that I coded for biological (or other) uses in diverse programing languages. Also some CSL for citation managers like Mendeley and Zotero. If you want use one of them and have doubts, please contact me by <a target="_blank" class="linknormal" href="mailto:camayal+scripts@gmail.com">email</a>.
+<br>
+
+<br>
+<strong>pseudoMiner v.U</strong> - 2018<br>
+Script to automatice the extraction of information about sequences from GenBank using Entrez database API. Additionally it classifies sequences in categories of kind of study where them were used.<br>
+<em>Script in Unique version</em>. Coded in: AutoIt v.3 BASIC-like scripting language
+<br>
+Download source code <a class="linknormal" href="https://www.dropbox.com/s/qmulp32hz8ygvj0/pseudoMinerFlBajio.au3?dl=1">here</a> 
+<br>
+
+<br>
+<strong>ConvertFileUsingAlterAPI v.1</strong> - 2017<br>
+Python script to convert all files in a folder using the API of the webservice of <a class="linknormal" target="_blank" href="http://sing.ei.uvigo.es/ALTER/">ALTER</a> (Glez-Peña et al. 2010). It can be used in two ways: 1) Paste the file .py in the folder with files to convert and double click it by default it will convert Nexus files to Phylip for using in PhyML. 2) In terminal or cmd in Windows, you can call it using the command line options documented in --help command. If you use this, you must know that it is just a script to execute the <a class="linknormal" target="_blank" href="http://sing.ei.uvigo.es/ALTER/api/">ALTER API</a> and you should cited it. Refer to the original <a class="linknormal" target="_blank" href="http://sing.ei.uvigo.es/ALTER/">ALTER website</a> for more details about citation.<br>
+<em>Python script in version 1</em>. Coded in: Python 2.7.11
+<br>
+Download it <a class="linknormal" href="https://www.dropbox.com/s/2enf5s7y1wjl8qb/ConvertFileUsingAlterAPI.py?dl=1">here</a> 
+<br>
+
+<br>
+<strong>FastChangeNames v.1</strong> - 2017<br>
+Change names in files like .tre, .xml, .nexus or others, based on xls file. It performs 1000s changes per second aprox. This script is used to change names in phylogenetic trees files or Nexus matrixes. The input is two columns, one with the current name and the second one is the new name in Excel. This have a graphic interface for easy use.<br>
+<em>Script compiled as binary (.exe) in version 1 for Windows 7 or superior</em>. Coded in: AutoIt v.3 BASIC-like scripting language 
+<br>
+Download it <a class="linknormal" href="https://www.dropbox.com/s/acny3hgo60l42rp/FastChangeNames%20%2832b%29.exe?dl=1">here for 32bits</a> and <a class="linknormal" href="https://www.dropbox.com/s/xalt9e67xuw28ae/FastChangeNames.exe?dl=1">here for 64bits</a>
+<br>
+
+<br>
+<strong>MIC (Manual Image Classify) v.U</strong> - 2017<br>
+Small application to facilitate the classification or taking data (notes) from images. Saving up to 8 different elements in a *.CSV file like a database. <br>
+<em>Script compiled as binary (.exe) in Unique version</em>. Coded in: AutoIt v.3 BASIC-like scripting language
+<br>
+Download it <a class="linknormal" href="https://www.dropbox.com/s/13m04f5l12b1xns/MIC.exe?dl=1">here</a>, source code availible through email request.
+<br>
+
+
+<br>
+<strong>HerbivoryScript for ImageJ v.1.2.1</strong> - 2016<br>
+Macro to conduct an assisted hervivory area analysis in leaves using images and color threshold functions on <a class="linknormal"  target="_blank" href="https://imagej.nih.gov/ij/index.html">ImageJ</a>. This is intended to measure patology and hervivory in leaves, the final result is a table including the percent of the damaged areas. This macro saves photos of the evidence, during the process.<br>
+<em>Script in beta version</em>. Coded in: ImageJ Macro Language
+<br>
+Download it <a class="linknormal" href="https://www.dropbox.com/s/4f4uuylsoorzoxp/Herbivory_v1.2.1.txt?dl=1">here</a>
+<br>
+
+
+<!-- <br>
+<strong>pseudoMinerFlBajio v.U</strong> - 2016<br>
+This code perform an automatic Blast using Entrez API in <a class="linknormal"  target="_blank" href="https://www.ncbi.nlm.nih.gov/genbank/">GenBank</a>of lists of species (this version was coded for check the Flora of Bajio, genomic analysis. The output is a CSV table with the follow information (it can be modified form the code): Species after GB analysis, GB Number, Lengths of fragments, Definitions, Misc. Info., Paper titles, Paper Journals, Searched name corrected. The input is a list of species "Genus+species"
+    <br>
+<em>Script in Unique version non-maintained</em>. Coded in: AutoIt v.3 BASIC-like scripting language
+<br>
+Download it <a class="linknormal" href="https://www.dropbox.com/s/h2mfmgj8bp574t3/pseudoMinerFlBajio.au3?dl=1">here</a>
+<br> -->
+
+
+<br>
+ChangeNames for Notepad++ v.U - 2014 - deprecated - updated in FastChangeNames script<br>
+Change names in files like .tre, .xml, .nexus or others, using <a class="linknormal" target="_blank" href="https://notepad-plus-plus.org/">Notepad++</a> to avoid modifications in non-printable characters or other coded characters. It performs 200 changes per minutes aprox. It code is used to change names in phylogenetic trees files or Nexus matrices. The input is two columns, one with the current name and the second one is the new name in Excel.<br>
+<em>Script in Unique version</em>. Coded in: AutoIt v.3 BASIC-like scripting language 
+<br>
+Download it <a class="linknormal" href="https://www.dropbox.com/s/0cw7lkz85nbca0h/ChangeNames%20for%20Notepad%2B%2B.au3?dl=1">here</a>
+<br>
+
+
+
+
+<br>
+<strong>CSL files for different journals</strong><br>
+Before you use them, check and double check if this is currently valid for the journal. <br>
+<a class="linknormal" href="https://www.dropbox.com/s/5mdlq1o1gt6kp98/taxon.csl?dl=1">CSL for Taxon</a><br>
+<a class="linknormal" href="https://www.dropbox.com/s/unr1hvo47mdud73/Taxon-proposals.csl?dl=1">CSL for Nomenclature proposals in Taxon</a><br>
+<a class="linknormal" href="https://www.dropbox.com/s/bv4kx9owfaogkas/systematic-botany.csl?dl=1">CSL for Systematic botany</a><br>
+<a class="linknormal" href="https://www.dropbox.com/s/qx4nhl1hpfdyyan/phytotaxa-biblio-32.csl?dl=1">CSL for Phytotaxa</a>
+<br>
+
+
+
+<!-- 
+<br>
+<strong>Name</strong> - year<br>
+Description. <br>
+<em>Script in beta version</em>. Coded in: ImageJ Macro Language
+<br>
+Download it <a class="linknormal" href="">here</a>
+<br>
+ -->
+
+
+
+<!-- 	<span style="color:#f7f7f7">Edited by Carlos Alonso Maya Lastra</span> -->
+
+<script>
+
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-56235798-1', 'auto');
+
+  ga('require', 'displayfeatures');
+
+  ga('send', 'pageview');
+
+</script>
+
+
+
+
+
+</body>
+
+</html>

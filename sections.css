@@ -1,0 +1,21 @@
+<style type="text/css">
+a[target="_blank"] {display:inline-block; padding-top:-20px; background:url(img/ex.png)  top right no-repeat;padding-right:12px;} a.linknormal {color: #ff0000;text-decoration: underline;}
+body {background:#f8f8f8;overflow:auto;}
+div {text-align:justify;}
+::-webkit-scrollbar-track{border-radius: 10px;	background-color: rgba(0,0,0,0);}
+::-webkit-scrollbar{width: 6px;	background-color: rgba(0,0,0,0);}
+::-webkit-scrollbar-thumb{border-radius: 30px;-webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3);	background-color: #C0C0C0;}
+
+
+.sp {
+font-style: italic;
+}
+
+
+@media all and (min-width: 1300px) {
+body{
+font-size:1.6vw;margin:0.9vw;
+}
+}	
+
+</style>
