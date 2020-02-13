@@ -141,11 +141,18 @@ button:active {
   margin-left: 30.5%;
   margin-top: 0.5%;
   position:absolute;
-  box-shadow: 0 1px 5px rgba(0,0,0,0.65);
+  box-shadow: 0 0 2px rgba(0,0,0,0.65);
   border:1px solid #ccc;
 }
 
+.link{
+cursor:pointer;
+}
 
+#exampleDescription{
+  font-weight: normal;
+  font-style: italic;
+}
 
   </style>
 
@@ -234,11 +241,14 @@ button:active {
       
           <div>
 <span>Test:
-<a id="ex1" href="#" onclick="example(1);" alt="Simple example">example 1</a>, 
-<a id="ex2" href="#" onclick="example(2);" title="Simple example showing colors">example 2</a>, 
-<a id="ex3" href="#" onclick="example(3);" title="Example of rooted newick file, data from Maya-Lastra & Steinmann, 2019">example 3</a>, 
-<a id="ex4" href="#" onclick="example(4);" title="Example with CSV without perfect match with tree tips, data from Maya-Lastra & Steinmann, 2017">example 4</a>
+<a id="ex1" class="link" onclick="example(1);" title="Simple example">example 1</a>, 
+<a id="ex2" class="link" onclick="example(2);" title="Simple example showing all different colors formats">example 2</a>, 
+<a id="ex3" class="link" onclick="example(3);" title="Simple example with multiple markers per tip in the tree">example 3</a>, 
+<a id="ex4" class="link" onclick="example(4);" title="Example of rooted newick file, Cnidoscolus data from Maya-Lastra & Steinmann, 2019">example 4</a>, 
+<a id="ex5" class="link" onclick="example(5);" title="Example with CSV without perfect match with tree tips, E. polycarpa data from Maya-Lastra & Steinmann, 2017">example 5</a>, 
+<a id="ex6" class="link" onclick="example(6);" title="All features example, inital hypothesis of E. polycarpa relationships from Maya-Lastra & Steinmann, 2017">example 6</a>
 </span>
+<span id="exampleDescription"> </span>
           </div>
 
 
@@ -520,8 +530,26 @@ function inScreenMarkers(corrected=true){
   for (x in markers){
     // console.log(markers[x]._popup._content + map.latLngToContainerPoint(markers[x]._latlng)) //object with lat long converted to 
     var coord = window.map.latLngToContainerPoint(markers[x]._latlng)
+
+    var xArray = []
+    var yArray = []
+    //Check if there is more than one marker for a particular tip in the tree and add the x and y coords to the existent array
+    if (obj[markers[x]._popup._content] != undefined){
+      // var numMarkers = obj[markers[x]._popup._content].numMarkers + 1;
+      xArray = obj[markers[x]._popup._content].x
+      xArray.push(coord.x + leftOriginMap)
+      yArray = obj[markers[x]._popup._content].y
+      yArray.push(coord.y)
+    }else{ //If the object with the name of the tip does not exist, just add the first element to the x and y Arrays
+      // var numMarkers = 1
+      xArray.push(coord.x + leftOriginMap)
+      yArray.push(coord.y)
+    }
+
     //If corrected is truee add the leaf position in screen of map container and put color if the property exist
-    obj[markers[x]._popup._content] = {"x": (corrected) ?  coord.x + leftOriginMap: coord.x, "y": coord.y, "color":markers[x].options.color}
+    // obj[markers[x]._popup._content] = {"x": (corrected) ?  coord.x + leftOriginMap : coord.x, "y": coord.y, "color": markers[x].options.color, "numMarkers":numMarkers}
+    obj[markers[x]._popup._content] = {"x": xArray, "y": yArray, "color": markers[x].options.color}
+
   }
   return obj
   //Return object with names and x y
@@ -591,23 +619,37 @@ function drawLines_MapPerspective(){
     // Return intersection in leaves and markers
   var commonList = Object.keys(markers).filter(value => Object.keys(leaves).includes(value))
 
+  // if (commonList.length > 0){
+  //   for (ele in commonList){
+  //       coord = {
+  //         "x1":leaves[commonList[ele]].x,
+  //         "y1":leaves[commonList[ele]].y,
+  //         "x2":markers[commonList[ele]].x,
+  //         "y2":markers[commonList[ele]].y
+  //         }
+  //       addLine(name,coord.x1,coord.y1,coord.x2,coord.y2,markers[commonList[ele]].color)
+  // }
+
+
   if (commonList.length > 0){
     for (ele in commonList){
+      //add line for every marker related with some tip in the tree, depends of the number of xs or ys defined by inScreenMarkers
+      for (numTips in markers[commonList[ele]].x){
+
         coord = {
           "x1":leaves[commonList[ele]].x,
           "y1":leaves[commonList[ele]].y,
-          "x2":markers[commonList[ele]].x,
-          "y2":markers[commonList[ele]].y
+          "x2":markers[commonList[ele]].x[numTips],
+          "y2":markers[commonList[ele]].y[numTips]
           }
         addLine(name,coord.x1,coord.y1,coord.x2,coord.y2,markers[commonList[ele]].color)
   }
-
-
+  }
 
 }
 }
 
-//Mark those tips or markers that do not match 
+//Mark those tips  that do not match 
 function markIncomplete(){
   var leaves = inScreenLeaves()
   var markers = inScreenMarkers()
@@ -673,10 +715,10 @@ function openModal(){
 }
 
 function closeModal(){
-  document.getElementById("btnBack").style.visibility = "visible";
   newickSource = document.getElementById("newickSource").value
   csvSource = document.getElementById("csvSource").value
   if (newickSource != "" & csvSource != ""){
+    document.getElementById("btnBack").style.visibility = "visible";  
     document.getElementById("myModal").style.display = "none";
     drawMap(); 
     drawMarkers(); 
@@ -709,7 +751,15 @@ Species C,18.875459, -97.793984,blue
 Species D,18.721245, -99.240330,#00f
 Species E,18.250205, -99.543424,SpringGreen`;
     break;
-  case 3:
+    case 3:
+  newick = "(('Species A':1,'Species B':1)90:3,('Species C':3,('Species D':1, 'Species E':1)100:2)100:1)100;";
+  latlong = `Species A,18.231141, -97.196820
+Species B,18.365796, -97.355109
+Species C,18.875459, -97.793984
+Species D,18.721245, -99.240330
+Species D,18.250205, -99.543424`;
+    break;
+  case 4:
   newick = "[&r]('J. gossypiifolia MX':0.159019785,(('M. esculenta':0.03430991,'M. sp.1. MX':0.03108594)0.999989:0.0994623,((('C. maculatus (1) MX':0.01176578,'C. angustidens subsp. angustidens MX':0.014324)0.999656:0.00701156,('C. monicanus MX':0.00589713,'C. tepiquensis MX':0.0077436,('C. sinaloensis MX':2.7E-7,'C. elasticus MX':1.0E-8)0.976426:0.00603602)1.0:0.01748868,('C. egregius (1) MX':0.014511610000000001,('C. palmeri (1) MX':0.00682808,'C. shrevei (1) MX':0.0127819)1.0:0.0175596,('C. rotundifolius (1) MX':0.00472435,('C. aconitifolius subsp. aconitifolius (2) MX':0.010108879999999999,('C. albidus (2) MX':0.00342319,'C. tehuacanensis (2) MX':0.0031953499999999996,'C. liebmannii (1) MX':0.00316536)0.98866:0.00156583,'C. spinosus (1) MX':0.00169776,'C. tubulosus MX':9.1E-7,'C. multilobus subsp. multilobus MX':0.01150661,('C. nov eglandulatus MX':0.0016563,'C. tehuacanensis (1) MX':1.0E-7,('C. rostratus subsp. rostratus MX':1.0E-7,('C. albidus (1) MX':1.0E-8,('C. nov infiernidialis (1) MX':1.9E-7,'C. megacanthus (1) MX':0.00316794)1.0:0.011586299999999999)0.988678:0.0016301)0.988678:0.00163022)0.980293:0.0016305800000000002)0.796162:0.00817568)0.999994:0.00960022)0.999995:0.00728019)0.991784:0.01759684,(('C. acrandrus DO':0.08658456,(('C. adenochlamys BR':0.00794682,'C. urens (2) BR':0.00339589)0.977755:0.00305672,'C. urens (4) MX':0.014495000000000001,('C. urniger BR':0.0016562,'C. urens (1) BO':0.0031587300000000002,'C. urens (8) BR':0.00653656,('C. tenuifolius BO':0.0049587,'C. cajamarcensis BO':0.01067278)0.998265:0.00520463)0.994272:0.00153649)1.0:0.03011173)0.923747:0.01312455,('C. oligandrus BR':0.01437007,(('C. quercifolius (1) BR':0.03839955,('C. obtusifolius (2) BR':0.02007852,('C. hamosus BR':0.00720701,'C. populifolius (1) BR':0.00769521)0.922819:0.013233849999999998)0.996666:0.00872602)0.993383:0.01189059,(('C. hasslerianus (2) BR':0.002192,'C. maracayensis PY':0.0023380700000000003)0.766812:0.00386561,('C. beckii (1) BO':0.00763107,'C. cnicodendron BO':0.00581903)1.0:0.03126635,'C. albomaculatus (2) BR':0.025931589999999997,('C. ulei BR':0.00194061,'C. vitifolius (2) BR':0.00210711)0.84578:0.00970075)0.996501:0.01171626)0.996325:0.01052145)0.999991:0.01758535)0.927592:0.01187532)0.992064:0.05946124):0.159019785);";
   latlong = `J. gossypiifolia MX,18.681297,-101.973580
 M. esculenta,-1.561118, -67.657992
@@ -759,7 +809,7 @@ C. albomaculatus (2) BR,-13.710049, -47.462670
 C. ulei BR,-14.723504, -42.510595
 C. vitifolius (2) BR,-7.740784, -38.960459`;
     break;
-  case 4:
+  case 5:
   newick = "(CAML_55:0.03002501,(((((((CAML_1:4.276406E-4,(CAML_114:0.001443409,CAML_117:0.001004847):0.002783129,CAML_116:6.081356E-4,(CAML_118:0.002926375,(((CAML_12:0.00104038,CAML_18:4.089298E-4,CAML_38:0.001599915,CAML_4:4.46339E-4,CAML_44:4.457301E-4,CAML_50:0.001060407):0.001037556,CAML_48:4.297398E-4,CAML_49:0.001052201):0.001719566,CAML_121:0.001065325,CAML_42:4.492334E-4):0.00106409,(CAML_27:0.001063314,CAML_40:0.00106066,CAML_41:4.335796E-4,CAML_9:4.232403E-4):0.001656501):9.92779E-4,CAML_15:4.178008E-4,CAML_22:0.001036489,CAML_23:4.35867E-4,CAML_3:0.00105558,CAML_30:0.001004657,CAML_31:4.406547E-4,CAML_47:0.001022236,CAML_68:4.509646E-4,CAML_8:5.810227E-4):0.002842149,(((CAML_11:6.937718E-4,CAML_19:6.092178E-4):0.002614933,CAML_21:4.347578E-4,CAML_24:0.001056313):0.00171098,CAML_125:0.002285596):0.001050798):0.003639817,(((CAML_10:0.002260375,((((((CAML_13:4.293888E-4,CAML_25:0.001066524):9.161603E-4,CAML_17:4.335609E-4):9.470983E-4,CAML_75:0.001631159):0.001118312,CAML_69:0.00134978):0.001338104,CAML_72:4.265862E-4,CAML_74:0.001033806,CAML_81:0.001547058):0.001783958,CAML_87:0.003330482):0.002804414,CAML_16:0.002938516,(CAML_2:8.882103E-4,CAML_26:0.001026782,(CAML_5:4.251328E-4,CAML_70:4.330876E-4):0.00102156,(CAML_63:6.990794E-4,CAML_86:0.001134544):0.001059191,CAML_71:4.224564E-4,CAML_85:0.001649691):0.003335783):0.001238778,CAML_32:0.002434564):0.002852503,CAML_29:0.005881684):0.002421499):8.196552E-4,(CAML_14:0.002605289,CAML_65:9.194277E-4):0.005728793,CAML_62:0.009695904):0.003632062,(CAML_64:0.004456276,CAML_7:0.003832268):0.005399093):0.01806623,(CAML_37:0.002295719,CAML_52:0.003143404):0.01792985):0.008517372,(CAML_103:7.772748E-4,CAML_108:0.001636196,CAML_128:0.001504829):0.02267193):0.01134899,((CAML_35:0.01293732,CAML_53:0.01155962):0.01472047,CAML_39:0.03940949):0.004570255);";
     latlong = `CAML_133,,
 CAML_132,,
@@ -895,6 +945,79 @@ CAML_3,25.653056,-111.031944
 CAML_2,23.217917,-109.453611
 CAML_1,25.814167,-111.311944`;
     break;
+  case 6:
+    newick="[&r]('E. micromera':0.012154063000000003,('E. arizonica':0.020225569,('E. p. carmenensis':0.009231360999999993,('E. p. johnstonii':0.009695904000000005,('E. p. hirtella':0.006976210999999996,('E. p. polycarpa':0.005881683999999998,('E. p. mejamia':0.002260374999999995,('E. p. intermixta':0.0033304819999999957,'E. p. genuflexa':0.003331016000000006):0.002804414000000005):0.004091281000000002):0.0024214989999999936):8.196552000000051E-4):0.0036320620000000053):0.018066230000000003):0.03282549800000001):0.0;"
+    latlong=`E. p. polycarpa,25.814167,-111.311944,Firebrick
+E. p. polycarpa,28.586389,-109.589722,Firebrick
+E. p. polycarpa,27.43015,-114.047967,Firebrick
+E. p. polycarpa,27.4959,-113.7741,Firebrick
+E. p. polycarpa,26.899083,-113.768733,Firebrick
+E. p. polycarpa,27.4959,-113.7741,Firebrick
+E. p. polycarpa,28.880533,-114.1362,Firebrick
+E. p. polycarpa,27.377383,-112.324483,Firebrick
+E. p. polycarpa,30.295278,-111.096667,Firebrick
+E. p. polycarpa,28.929333,-113.552383,Firebrick
+E. p. polycarpa,23.404722,-110.206389,Firebrick
+E. p. polycarpa,25.998889,-111.106111,Firebrick
+E. p. polycarpa,25.706944,-111.049444,Firebrick
+E. p. polycarpa,24.135556,-110.425278,Firebrick
+E. p. polycarpa,32.290278,-110.959722,Firebrick
+E. p. polycarpa,28.773333,-110.505,Firebrick
+E. p. polycarpa,26.54,-111.723889,Firebrick
+E. p. polycarpa,25.706944,-111.049444,Firebrick
+E. p. polycarpa,23.403611,-110.204167,Firebrick
+E. p. polycarpa,34.419167,-118.594722,Firebrick
+E. p. polycarpa,22.925194,-109.833139,Firebrick
+E. p. polycarpa,25.653056,-111.031944,Firebrick
+E. p. polycarpa,27.8375,-113.728056,Firebrick
+E. p. polycarpa,23.542041,-109.499914,Firebrick
+E. p. polycarpa,23.542041,-109.499914,Firebrick
+E. p. polycarpa,26.056389,-112.289167,Firebrick
+E. p. polycarpa,32.4475,-111.505833,Firebrick
+E. p. polycarpa,32.9761,-117.1175,Firebrick
+E. p. polycarpa,32.8544,-116.8838,Firebrick
+E. p. polycarpa,32.8376702,-117.1223503,Firebrick
+E. p. polycarpa,33.1118,-116.3793,Firebrick
+E. p. polycarpa,24.209167,-110.079444,Firebrick
+E. p. polycarpa,25.460806,-111.052667,Firebrick
+E. p. polycarpa,32.8329,-116.1802,Firebrick
+E. p. polycarpa,32.9225,-116.2228,Firebrick
+E. p. polycarpa,24.139167,-109.804338,Firebrick
+E. p. polycarpa,24.15,-110.116667,Firebrick
+E. p. polycarpa,24.268301,-111.316589,Firebrick
+E. p. polycarpa,24.0267,-110.296667,Firebrick
+E. p. polycarpa,23.57945,-110.215117,Firebrick
+E. p. polycarpa,23.57945,-110.215117,Firebrick
+E. p. polycarpa,23.42685,-110.213117,Firebrick
+E. p. polycarpa,23.3995,-110.1961,Firebrick
+E. p. polycarpa,23.727467,-109.791067,Firebrick
+E. p. polycarpa,33.828117,-117.743583,Firebrick
+E. arizonica,,,
+E. micromera,,,
+E. p. carmenensis,25.666667,-110.783333,ForestGreen
+E. p. carmenensis,26.015751,-111.166,ForestGreen
+E. p. carmenensis,24.507704,-110.382548,ForestGreen
+E. p. carmenensis,25.806667,-111.428333,ForestGreen
+E. p. carmenensis,26.016944,-111.163056,ForestGreen
+E. p. genuflexa,22.893467,-109.991133,Purple
+E. p. genuflexa,25.074444,-110.853056,Purple
+E. p. genuflexa,23.217917,-109.453611,Purple
+E. p. hirtella,29.090596,-113.268926,DarkKhaki
+E. p. hirtella,33.2887,-116.172,DarkKhaki
+E. p. hirtella,33.668683,-115.912283,DarkKhaki
+E. p. hirtella,28.5675,-109.556944,DarkKhaki
+E. p. intermixta,23.764317,-110.00485,DarkSlateGray
+E. p. intermixta,28.876944,-110.748611,DarkSlateGray
+E. p. johnstonii,26.345243,-111.727271,Black
+E. p. mejamia,23.37075,-109.762367,MediumBlue
+E. p. mejamia,23.878017,-110.2341,MediumBlue
+E. p. mejamia,23.878017,-110.2341,MediumBlue
+E. p. mejamia,23.089722,-109.629167,MediumBlue
+E. p. mejamia,23.408889,-110.203333,MediumBlue
+E. p. mejamia,23.536667,-109.767222,MediumBlue
+E. p. mejamia,23.878056,-110.233889,MediumBlue
+`
+    break;
   default:
   newick = "";
   latlong = "";
@@ -902,6 +1025,11 @@ CAML_1,25.814167,-111.311944`;
 }
 newickSource.value = newick;
 csvSource.value = latlong;
+if (!e){
+  var e = window.event
+  document.getElementById("exampleDescription").innerText = e.srcElement.title
+}
+
 }
 
 
