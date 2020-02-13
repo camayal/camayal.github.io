@@ -1,8 +1,12 @@
 <html>
 <head>
-  <title>TreeToM - Simple tool for visualizing phylogenetic trees to maps</title>
+  <title>TreeToM - Simple tool for visualizing phylogenetic trees onto a map</title>
   <meta charset="utf-8"/>
   <link href="/img/favicon.ico?v=m229mLN9lM" rel="shortcut icon">
+  <meta content="Simple tool to show phylogenetic trees onto maps for non-coders and stress free" name="description">
+  <meta content="phylogeny, newick, phylogenetics, map, phylogeography" name="keywords">
+  <meta content="Carlos Alonso Maya Lastra" name="author">
+
   <style>
 
     #mapid { 
@@ -83,7 +87,7 @@
   display: none; /* Hidden by default */
   position: fixed; /* Stay in place */
   z-index: 1; /* Sit on top */
-  padding-top: 10vh; /* Location of the box */
+  padding-top: 8vh; /* Location of the box */
   left: 0;
   top: 0;
   width: 100%; /* Full width */
@@ -149,7 +153,7 @@ button:active {
 cursor:pointer;
 }
 
-#exampleDescription{
+#exampleDescription, #author{
   font-weight: normal;
   font-style: italic;
 }
@@ -225,7 +229,9 @@ cursor:pointer;
       
       
       <div class="textAreaColumn">
-          <span>Carlos Alonso Maya-Lastra - 2020</span>
+        <div>Simple tool for visualizing phylogenetic trees onto a map</div>
+        
+        <div id="author">Carlos Alonso Maya-Lastra - 2020</div>
           
           <div>
             <span>Newick tree</span>
@@ -294,7 +300,7 @@ function drawMap(){
   //     maxZoom: 18,
   //     id: 'mapbox/streets-v11',
   //     // No for distribution?
-  //     accessToken: 'pk.eyJ1IjoiY2FtYXlhbCIsImEiOiJjazZjeW1jdTgxNGVqM21yemR1MjIzcW81In0.9yON8eg2-xwLFPtoocIBaw',
+  //     accessToken: '',
   // }).addTo(window.map);
 
 
