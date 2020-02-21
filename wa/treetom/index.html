@@ -9,15 +9,18 @@
 
   <style>
 
+
+
     #mapid { 
       height: 100%;
       width: 70%;
       margin-left: 30%;
     }
 
+    
 
     #svg { 
-      position: absolute; 
+      position:absolute; 
       top: 0px;
       left: 0px;
       width: 28%; 
@@ -42,6 +45,7 @@
     .branch {
       pointer-events: none;
     }
+
 
     #linesContainer{
       position: absolute;
@@ -185,6 +189,8 @@ cursor:pointer;
   <script src="https://d3js.org/d3.v3.min.js" charset="utf-8"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.3/underscore-min.js" charset="utf-8"></script>
   <script type='text/javascript' src='phylotree.js'></script>
+  
+
 
     <!-- Load Esri Leaflet from CDN -->
     <script src="https://unpkg.com/esri-leaflet@2.3.3/dist/esri-leaflet.js"
@@ -192,7 +198,7 @@ cursor:pointer;
     crossorigin=""></script>
 
 
-
+    
 
 </head>
 
@@ -209,7 +215,7 @@ cursor:pointer;
 
 
 <!-- map -->
-      <button id="btnBack" name="btnBack" onclick="openModal()">Back</button>
+      <button id="btnBack" name="btnBack">Back</button>
       <div id="mapid">
       </div>
 
@@ -309,40 +315,28 @@ function drawMap(){
   // }).addTo(window.map);
 
 
-  // Define all possible layers in ESRI plugin
-var   topographic = L.esri.basemapLayer("Topographic"),
-      streets = L.esri.basemapLayer("Streets"),
-      nationalGeographic = L.esri.basemapLayer("NationalGeographic"),
-      oceans = L.esri.basemapLayer("Oceans"),
-      gray = L.esri.basemapLayer("Gray"),
-      darkGray = L.esri.basemapLayer("DarkGray"),
-      imagery = L.esri.basemapLayer("Imagery"),
-      imageryClarity = L.esri.basemapLayer("ImageryClarity"),
-      imageryFirefly = L.esri.basemapLayer("ImageryFirefly"),
-      shadedRelief = L.esri.basemapLayer("ShadedRelief"),
-      terrain = L.esri.basemapLayer("Terrain");
-
 
 // Set map with topographic as default
 window.map = L.map('mapid', {
-    layers: [topographic],
+    layers: [L.esri.basemapLayer("Topographic")],
     zoomControl: false,
 
 });
 
 // Object with info for control layers
 var baseMaps = {
-  "Topographic": topographic,
-  "Streets": streets,
-  "National Geographic": nationalGeographic,
-  "Oceans": oceans,
-  "Gray": gray,
-  "DarkGray": darkGray,
-  "Imagery": imagery,
-  "Imagery (Clarity)": imageryClarity,
-  "Imagery (Firefly)": imageryFirefly,
-  "Shaded relief": shadedRelief,
-  "Terrain": terrain,
+  "Topographic": L.esri.basemapLayer("Topographic"),
+  "Streets": L.esri.basemapLayer("Streets"),
+  "National Geographic": L.esri.basemapLayer("NationalGeographic"),
+  "Oceans": L.esri.basemapLayer("Oceans"),
+  "Gray": L.esri.basemapLayer("Gray"),
+  "DarkGray": L.esri.basemapLayer("DarkGray"),
+  "Imagery": L.esri.basemapLayer("Imagery"),
+  "Imagery (Clarity)": L.esri.basemapLayer("ImageryClarity"),
+  "Imagery (Firefly)": L.esri.basemapLayer("ImageryFirefly"),
+  "Shaded relief": L.esri.basemapLayer("ShadedRelief"),
+  "Terrain": L.esri.basemapLayer("Terrain"),
+  // "Gain": L.tileLayer('http://earthengine.google.org/static/hansen_2013/gain/{z}/{x}/{y}.png'),
 };
 
 
@@ -356,8 +350,8 @@ L.control.zoom({
 }).addTo(window.map);
 
 
-
-
+// Add map scale
+L.control.scale({metric:true, imperial:false}).addTo(window.map);
 
 
 
@@ -621,7 +615,7 @@ function getFeaturesInView() {
 // Call draw lines and mark those are not matching
 function drawLines_MapPerspective(){
   // try{
-  // Clear svg object (maybe check a fifferent solution than jquary)
+  // Clear svg object (maybe check a fifferent solution than jquery)
   $("#linesContainer").empty();
 
   var leaves = inScreenLeaves()
@@ -733,12 +727,39 @@ function closeModal(){
     document.getElementById("myModal").style.display = "none";
     drawMap(); 
     drawMarkers(); 
-    drawTree(); 
+    drawTree();
     centerView();
+    
   }else{
     window.alert("Nothing to show, enter newick tree and csv formated lat-long information to continue");
   }
 }
+
+
+// Control reprinting tree useful for resizing
+function redrawTree(){
+  if(document.getElementById("myModal").style.display == "none"){
+    drawTree()
+    // drawLines_MapPerspective()
+    // markIncomplete()
+    setTimeout(function () {
+      drawLines_MapPerspective()
+      markIncomplete()
+    }, 1000);
+    
+}
+}
+
+//Listener for resizing screen
+window.addEventListener("resize", redrawTree);
+
+
+window.addEventListener('beforeprint', function(){
+  switchVisibilityElements(false);
+  redrawTree()
+})
+
+
 
 //Examples
 function example(num){
@@ -1129,7 +1150,41 @@ function readText(e) {
 
 }
 
-	 
+
+
+
+// Listener for back button
+document.getElementById("btnBack").addEventListener('click', openModal);
+
+// Temporary solution for exporting. this hide the buttons for 30 seconds to take the screenshot
+document.getElementById("btnBack").addEventListener('contextmenu', function(ev) {
+    ev.preventDefault();
+    switchVisibilityElements(false)
+    
+}, false);
+
+
+
+
+
+// Hide controls and shadows or back to default state
+function switchVisibilityElements(isVisible, time=30000){
+    document.getElementById("btnBack").hidden = !isVisible;
+    document.getElementsByClassName("leaflet-top leaflet-right")[0].hidden = !isVisible
+    document.getElementsByClassName("leaflet-control-zoom")[0].hidden = !isVisible
+
+    if (!isVisible){
+      document.getElementById("nameApp").style.textShadow = "none"; 
+      document.getElementById("nameApp").style.fontWeight = "bold"
+      setTimeout(switchVisibilityElements, time, true)
+    }
+      else{
+      document.getElementById("nameApp").style.textShadow = "-0.5px 0 " + randomColor() + ", 0 0.5px " + randomColor() + ", 0.5px 0 " + randomColor() + ", 0 -0.5px " + randomColor(); 
+      document.getElementById("nameApp").style.fontWeight = "normal"
+    }
+}
+
+
 
 (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
   (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
