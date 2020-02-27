@@ -207,7 +207,7 @@ cursor:pointer;
     
 </head>
 
-<body onload="openModal()">
+<body onload="getURLParemeters()">
 
 <!-- tree -->
     <div id="treeContainer">
@@ -304,7 +304,7 @@ cursor:pointer;
 
 
 // Create object map and define controls of dragging map
-function drawMap(){
+function drawMap(xyzurl){
   //clean map in case it is
   if (window.map != undefined) { 
     map.remove(); 
@@ -358,8 +358,9 @@ var overlays = {
 //   "Personalized map": L.tileLayer('http://earthengine.google.org/static/hansen_2013/gain/{z}/{x}/{y}.png')
 }
 
-if (document.getElementById("xyzURL").value){
-  overlays["Personalized layer"] = L.tileLayer(document.getElementById("xyzURL").value).addTo(window.map)
+// if (document.getElementById("xyzURL").value){
+if (xyzurl){
+  overlays["Personalized layer"] = L.tileLayer(xyzurl).addTo(window.map)
   // overlays["Personalized layer"].addTo(map);
 }
 
@@ -423,10 +424,11 @@ window.map.on('zoomstart', function(e) {
 
 
 
-function drawMarkers(){
+function drawMarkers(csvSource){
 try{
 // Get csv from textarea
-csvString = document.getElementById("csvSource").value.trim()
+// csvString = document.getElementById("csvSource").value.trim()
+csvString = csvSource.trim()
 csvString = csvString.replace(/\n\s*\n/g, '\n');
 markersJSONString = csv2json(csvString)
 
@@ -458,7 +460,7 @@ catch(error){
 
 
 
-function drawTree(){
+function drawTree(newickSource){
 //Tree plot example
 
 //Show attribution of Phylotree
@@ -501,10 +503,10 @@ window.tree = d3.layout.phylotree()
 
 
 // Get newick string
-newick = document.getElementById("newickSource").value
+// newick = document.getElementById("newickSource").value
 
 // Plot tree
-tree(newick).layout(true);
+tree(newickSource).layout(true);
 
 
 }
@@ -742,19 +744,32 @@ function addLine(id,x1,y1,x2,y2,stroke="Black",strokeWidth=1){
 
 // Control modal
 function openModal(){
+    removeUrlParameter("id")
     document.getElementById("btnBack").style.visibility = "hidden";
     document.getElementById("myModal").style.display = "block";
 }
 
-function closeModal(){
-  newickSource = document.getElementById("newickSource").value
-  csvSource = document.getElementById("csvSource").value
+
+function closeModal(newickSource=null,csvSource=null,xyzurl=null){
+  if (newickSource == null){
+      newickSource = document.getElementById("newickSource").value
+  }
+  if (csvSource == null){
+      csvSource = document.getElementById("csvSource").value
+  }
+  if (xyzurl == null){
+    xyzurl = document.getElementById("xyzURL").value
+  }
+
+
+  
+
   if (newickSource != "" & csvSource != ""){
     document.getElementById("btnBack").style.visibility = "visible";  
     document.getElementById("myModal").style.display = "none";
-    drawMap(); 
-    drawMarkers(); 
-    drawTree();
+    drawMap(xyzurl); 
+    drawMarkers(csvSource); 
+    drawTree(newickSource);
     centerView();
     
   }else{
@@ -1223,16 +1238,26 @@ function switchVisibilityElements(isVisible, time=30000){
 
 
 
+//Detect if URL has some urlsearch paremeter, if not open modal
+function getURLParemeters(){
+  if ('URLSearchParams' in window) {
+    var searchParams = new URLSearchParams(window.location.search.slice(1))
+    if(searchParams.has('id') === true & searchParams.get('id') != ""){
+      loadData(searchParams.get('id'))
+      //Change button text Back for New
+      document.getElementById("btnBack").innerText = "New";
+    }else{
+      openModal()
+    }
+
+}else{//if browser is not capable also open modal
+  openModal()
+  window.alert("Your browser does not support this function")
+}
+}
 
 
 
-(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
-  ga('create', 'UA-56235798-1', 'auto');
-  ga('require', 'displayfeatures');
-  ga('send', 'pageview');
 
 </script>
 
@@ -1240,12 +1265,10 @@ function switchVisibilityElements(isVisible, time=30000){
 <script src="https://www.gstatic.com/firebasejs/7.9.1/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/7.9.1/firebase-firestore.js"></script>
 <script src="https://www.gstatic.com/firebasejs/7.9.1/firebase-auth.js"></script>
-<script src="https://www.gstatic.com/firebasejs/7.9.1/firebase-analytics.js"></script>
+<!-- <script src="https://www.gstatic.com/firebasejs/7.9.1/firebase-analytics.js"></script> -->
 
 <script>
-// const firebase = require("firebase");
-// // Required for side-effects
-// require("firebase/firestore");
+//Share functionality starts here
 
 // Initialize Cloud Firestore through Firebase
 firebase.initializeApp({
@@ -1257,81 +1280,114 @@ firebase.initializeApp({
 var db = firebase.firestore();
 
 
-//anonimous autorization
-// firebase.auth().signInAnonymously().catch(function(error) {
-//   // Handle Errors here.
-//   var errorCode = error.code;
-//   var errorMessage = error.message;
-//   // ...
-// });
-
-// firebase.auth().onAuthStateChanged(function(user) {
-//   if (user) {
-//     // User is signed in.
-//     var isAnonymous = user.isAnonymous;
-//     var uid = user.uid;
-//     // ...
-//   } else {
-//     // User is signed out.
-//     // ...
-//   }
-//   // ...
-// });
+//anonymous autorization
+firebase.auth().signInAnonymously().catch(function(error) {
+  // Handle Errors here.
+  var errorCode = error.code;
+  var errorMessage = error.message;
+  // ...
+});
 
 
+//detect anonymous info
+firebase.auth().onAuthStateChanged(function(user) {
+  if (user) {
+    // User is signed in. Show share button, if not something happen
+    // var uid = user.uid;
 
-// function create(email, password){
-//   firebase.auth().createUserWithEmailAndPassword(email, password).catch(function(error) {
-//   // Handle Errors here.
-//   var errorCode = error.code;
-//   var errorMessage = error.message;
-//   // ...
-//   console.log(error)
-// });
-// }
+  } else {
+    // User is signed out. or never sign in not show share button
+    // 
+  }
+});
 
-// function signin(email, password){
-//   firebase.auth().signInWithEmailAndPassword(email, password).catch(function(error) {
-//   // Handle Errors here.
-//   var errorCode = error.code;
-//   var errorMessage = error.message;
-//   // ...
-//   console.log(error)
-
-// });
-// }
-
-
-//firebase.auth().currentUser.uid
 
 
 //Save data in database
-function addData(data){
+function saveData(publicName=null, secretKey=null, author=""){
   db.collection("userTreeMaps").add({
-    tree: data,
-    gps: data,
-    center: data,
-    layer: data,
-    customLayer: data,
-    secretKey:data,
-    publicName:data,
-
+    tree: document.getElementById("newickSource").value,
+    gps: document.getElementById("csvSource").value,
+    // center: "none",
+    // layer: "none",
+    customLayer: document.getElementById("xyzURL").value,
+    // secretKey: secretKey,
+    // publicName: publicName,
+    userID:firebase.auth().currentUser.uid,
+    author: author,
 })
 .then(function(docRef) {
     // console.log("Document written with ID: ", docRef.id);
-    
+    addUrlParameter("id", docRef.id)
 })
 .catch(function(error) {
     console.error("Error adding document: ", error);
+    window.alert("Error saving tree and coordinates in the database")
 });
 
 }
 
-function loadData(){
+
+
+
+
+//Load data from Firebase
+function loadData(id){
+
+var docRef = db.collection("userTreeMaps").doc(id);
+
+docRef.get().then(function(doc) {
+    if (doc.exists) {
+        data = doc.data()
+        closeModal(data.tree, data.gps, data.customLayer)
+    } else {
+        // doc.data() will be undefined in this case
+        // console.log("No such document!");
+        //if fails load open modal
+        openModal()
+        window.alert("Tree and coordinates associated with "+id+" are not available")
+    }
+}).catch(function(error) {
+    console.log("Error getting document:", error);
+    openModal()
+});
+
+
 
 }
 
 
+//Modify the current URL to show the identificator
+function addUrlParameter(name, value) {
+  if ('URLSearchParams' in window) {
+    var searchParams = new URLSearchParams(window.location.search)
+    searchParams.set(name, value);
+    var newRelativePathQuery = window.location.pathname + '?' + searchParams.toString();
+    history.pushState(null, '', newRelativePathQuery);
+}else{
+  window.alert("Your browser does not support this function")
+}
+}
+
+function removeUrlParameter(name) {
+  if ('URLSearchParams' in window) {
+    var searchParams = new URLSearchParams(window.location.search.slice(1))
+    if(searchParams.has(name) === true){
+    searchParams.delete(name)
+    history.pushState(null, '', window.location.pathname);
+    }
+}
+}
+
+
+
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+  ga('create', 'UA-56235798-1', 'auto');
+  ga('require', 'displayfeatures');
+  ga('send', 'pageview');
 </script>
 
 </body>
