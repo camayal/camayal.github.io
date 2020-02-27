@@ -207,7 +207,7 @@ cursor:pointer;
     
 </head>
 
-<body onload="getURLParemeters()">
+<body onload="">
 
 <!-- tree -->
     <div id="treeContainer">
@@ -1294,11 +1294,13 @@ firebase.auth().onAuthStateChanged(function(user) {
   if (user) {
     // User is signed in. Show share button, if not something happen
     // var uid = user.uid;
-
-  } else {
-    // User is signed out. or never sign in not show share button
-    // 
-  }
+    getURLParemeters()
+  } 
+  // else {
+  //   // User is signed out. or never sign in not show share button
+  //   // openModal()
+  //   // window.alert("Your browser does not support this function")
+  // }
 });
 
 
