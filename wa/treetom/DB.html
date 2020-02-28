@@ -207,7 +207,7 @@ cursor:pointer;
     
 </head>
 
-<body onload="">
+<body onload="loadWebsite()">
 
 <!-- tree -->
     <div id="treeContainer">
@@ -1237,26 +1237,48 @@ function switchVisibilityElements(isVisible, time=30000){
 }
 
 
+var dbOperation = null;
+// var globalId = null;
 
 //Detect if URL has some urlsearch paremeter, if not open modal
-function getURLParemeters(){
+// function getURLParemeters(){
+//   if ('URLSearchParams' in window) {
+//     var searchParams = new URLSearchParams(window.location.search.slice(1))
+//     if(searchParams.has('id') === true & searchParams.get('id') != ""){
+//       // loadData(searchParams.get('id'))
+//       globalId = searchParams.get('id')
+//       dbOperation = "load"
+//       //Change button text Back for New
+//       // document.getElementById("btnBack").innerText = "New";
+//     }else{
+//       openModal()
+//     }
+
+// }else{//if browser is not capable also open modal
+//   openModal()
+//   window.alert("Your browser does not support this function")
+// }
+// }
+
+function getURLParemeters(name){
   if ('URLSearchParams' in window) {
     var searchParams = new URLSearchParams(window.location.search.slice(1))
-    if(searchParams.has('id') === true & searchParams.get('id') != ""){
-      loadData(searchParams.get('id'))
-      //Change button text Back for New
-      document.getElementById("btnBack").innerText = "New";
+    if(searchParams.has(name) === true & searchParams.get(name) != ""){
+      return searchParams.get(name)
     }else{
-      openModal()
+      return null
     }
-
-}else{//if browser is not capable also open modal
-  openModal()
-  window.alert("Your browser does not support this function")
 }
 }
 
-
+function loadWebsite(){
+  if (getURLParemeters("id")){
+    dbOperation = "load"
+    logInFireBase()
+  }else{
+    openModal()
+  }
+}
 
 
 </script>
@@ -1280,6 +1302,7 @@ firebase.initializeApp({
 var db = firebase.firestore();
 
 
+function logInFireBase(){
 //anonymous autorization
 firebase.auth().signInAnonymously().catch(function(error) {
   // Handle Errors here.
@@ -1287,14 +1310,23 @@ firebase.auth().signInAnonymously().catch(function(error) {
   var errorMessage = error.message;
   // ...
 });
+}
 
 
-//detect anonymous info
+//detect anonymous info login
 firebase.auth().onAuthStateChanged(function(user) {
   if (user) {
     // User is signed in. Show share button, if not something happen
     // var uid = user.uid;
-    getURLParemeters()
+    // getURLParemeters()
+    if (dbOperation == "load"){
+      loadData(getURLParemeters("id"))
+      dbOperation = null
+    }
+    if(dbOperation == "save"){
+      saveData()
+      dbOperation = null
+    }
   } 
   // else {
   //   // User is signed out. or never sign in not show share button
@@ -1304,33 +1336,45 @@ firebase.auth().onAuthStateChanged(function(user) {
 });
 
 
+//Launch save event checking if the user is logged or not
+function preSaveData(){
+  //If a ID is in the url, abort saving process
+  if (getURLParemeters('id')){return}
+  //Detect if an anonymous user is linked to this session, else create one
+  if (firebase.auth().currentUser){
+    saveData()
+  }else{
+    logInFireBase()
+    dbOperation = "save"
+  }
 
-//Save data in database
-function saveData(publicName=null, secretKey=null, author=""){
-  db.collection("userTreeMaps").add({
-    tree: document.getElementById("newickSource").value,
-    gps: document.getElementById("csvSource").value,
-    // center: "none",
-    // layer: "none",
-    customLayer: document.getElementById("xyzURL").value,
-    // secretKey: secretKey,
-    // publicName: publicName,
-    userID:firebase.auth().currentUser.uid,
-    author: author,
-})
-.then(function(docRef) {
-    // console.log("Document written with ID: ", docRef.id);
-    addUrlParameter("id", docRef.id)
-})
-.catch(function(error) {
-    console.error("Error adding document: ", error);
-    window.alert("Error saving tree and coordinates in the database")
-});
+  //Nested function
+  //Save data in database
+  function saveData(publicName=null, secretKey=null, author=""){
+    db.collection("userTreeMaps").add({
+      tree: document.getElementById("newickSource").value,
+      gps: document.getElementById("csvSource").value,
+      // center: "none",
+      // layer: "none",
+      customLayer: document.getElementById("xyzURL").value,
+      // secretKey: secretKey,
+      // publicName: publicName,
+      userID:firebase.auth().currentUser.uid,
+      author: author,
+  })
+  .then(function(docRef) {
+      // console.log("Document written with ID: ", docRef.id);
+      addUrlParameter("id", docRef.id)
+  })
+  .catch(function(error) {
+      console.error("Error adding document: ", error);
+      window.alert("Error saving tree and coordinates in the database")
+  });
+
+  }
+
 
 }
-
-
-
 
 
 //Load data from Firebase
@@ -1376,12 +1420,15 @@ function removeUrlParameter(name) {
     var searchParams = new URLSearchParams(window.location.search.slice(1))
     if(searchParams.has(name) === true){
     searchParams.delete(name)
-    history.pushState(null, '', window.location.pathname);
+    // history.pushState(null, '', window.location.pathname);
+    window.location = window.location.pathname
     }
 }
 }
 
-
+window.addEventListener('popstate', (event) => {
+  console.log(event);
+});
 
 (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
   (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
