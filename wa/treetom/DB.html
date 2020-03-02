@@ -1523,6 +1523,34 @@ docRef.get().then(function(doc) {
         // doc.data() will be undefined in this case
         // console.log("No such document!");
         //if fails load open modal
+        // openModal()
+        // window.alert("Tree and coordinates associated with "+id+" are not available")
+        loadPremiumKey(id)
+    }
+}).catch(function(error) {
+    console.log("Error getting document:", error);
+    openModal()
+});
+
+
+
+}
+
+
+function loadPremiumKey(id){
+
+var docRef = db.collection("properNameKeys").doc(id);
+var result = "";
+
+docRef.get().then(function(doc) {
+    if (doc.exists) {
+        data = doc.data()
+        
+        loadData(data.id)
+    } else {
+        // doc.data() will be undefined in this case
+        // console.log("No such document!");
+        //if fails load open modal
         openModal()
         window.alert("Tree and coordinates associated with "+id+" are not available")
     }
@@ -1534,6 +1562,7 @@ docRef.get().then(function(doc) {
 
 
 }
+
 
 
 //Modify the current URL to show the identificator
