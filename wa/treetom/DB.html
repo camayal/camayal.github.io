@@ -88,6 +88,10 @@
       display:none;
     }
 
+    input{
+      width:100%;
+    }
+
     /* The Modal (background) */
 .modal {
   display: none; /* Hidden by default */
@@ -107,10 +111,36 @@
 .modal-content {
   background-color: #fefefe;
   margin: auto;
-  padding: 20px;
+  padding: 2.5vh;
   border: 1px solid #888;
   width: 80%;
-  
+  height: 90vh; /* Full height */
+  overflow: auto;
+}
+
+.modal-share{
+  height: 30vh; 
+}
+
+#shareInfo{
+      display:none;
+}
+
+
+/* The Close Button */
+.close {
+  color: #aaaaaa;
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+  user-select: none;
+}
+
+.close:hover,
+.close:focus {
+  color: #000;
+  text-decoration: none;
+  cursor: pointer;
 }
 
 .ascii-art {
@@ -118,6 +148,7 @@
     white-space: pre;
     line-height: 1.15em;
 }
+
 
 
 button {
@@ -141,18 +172,22 @@ button:hover {
 	background-color:#f6f6f6;
 }
 button:active {
-	position:relative;
+	/* position:relative; */
 	top:1px;
   outline: none;
 }
 
-#btnBack {
+#btnOnMapContainer{
   visibility: hidden;
   z-index: 99999;
   margin-left: 30.5%;
   margin-top: 0.5%;
   position:absolute;
-  box-shadow: 0 0 2px rgba(0,0,0,0.65);
+}
+
+
+.btnOnMap{
+  box-shadow: 0 0 1px rgba(0,0,0,0.65);
   border:1px solid #ccc;
 }
 
@@ -169,6 +204,9 @@ cursor:pointer;
 .twitter-follow-button{
     float: right;
 }
+
+
+
 
   </style>
 
@@ -202,7 +240,7 @@ cursor:pointer;
     crossorigin=""></script>
 
 
-    
+    <script type="text/javascript" src="https://platform-api.sharethis.com/js/sharethis.js#property=5e5c61cb10563a0019921219&product=inline-share-buttons" async="async"></script>
     
     
 </head>
@@ -220,7 +258,10 @@ cursor:pointer;
 
 
 <!-- map -->
-      <button id="btnBack" name="btnBack">Back</button>
+    <div id="btnOnMapContainer">
+      <button class="btnOnMap" id="btnBack" name="btnBack">Back</button>
+      <button class="btnOnMap" id="btnShare" name="btnShare">Share</button>
+    </div>
       <div id="mapid">
       </div>
 
@@ -280,6 +321,7 @@ cursor:pointer;
 
           <div>
       <button id="btnTreeToMap" name="btnTreeToMap" onclick="closeModal()">Tree to map</button>
+          
     </div>
     </div>
   
@@ -287,13 +329,38 @@ cursor:pointer;
 
 
   
-
-
+  
 
 
 </div>
 
-
+<div id="shareModal" class="modal">
+  
+  <div class="modal-content modal-share">
+    <span class="close">&times;</span>
+    <div id="sharedWarning" class="textAreaColumn">
+      <div>
+    <span>Before sharing this tree and map consider the following information:</span>
+    </div>
+      <span>
+      - Everyone with the URL may see this tree and map<br>
+      - URL generated is a permanent URL, neither tree or coordinates associated with this can change<br>
+      - URL removing is only allowed by request<br><br>
+    </span>
+    <div>
+    <span>Do you want to share this tree and map?</span>
+  </div>
+    <button id="btnShare" name="btnShare" onclick="preSaveData()">Generate URL to share</button>
+  </div>
+  <div id="shareInfo" class="textAreaColumn">
+    <div>
+    <span>Use the following link to share this tree and map</span>
+  </div>
+    <input  type="text" id="shareURL" autocomplete="off" onClick="this.setSelectionRange(0, this.value.length)">
+    <div class="sharethis-inline-share-buttons"></div>
+  </div>
+  </div>
+</div>
 
 
 <ul id="d3_layout_phylotree_context_menu" class="dropdown-menu" role="menu" style="display: none;"><il></il></ul>
@@ -745,7 +812,7 @@ function addLine(id,x1,y1,x2,y2,stroke="Black",strokeWidth=1){
 // Control modal
 function openModal(){
     removeUrlParameter("id")
-    document.getElementById("btnBack").style.visibility = "hidden";
+    document.getElementById("btnOnMapContainer").style.visibility = "hidden";
     document.getElementById("myModal").style.display = "block";
 }
 
@@ -765,7 +832,7 @@ function closeModal(newickSource=null,csvSource=null,xyzurl=null){
   
 
   if (newickSource != "" & csvSource != ""){
-    document.getElementById("btnBack").style.visibility = "visible";  
+    document.getElementById("btnOnMapContainer").style.visibility = "visible";  
     document.getElementById("myModal").style.display = "none";
     drawMap(xyzurl); 
     drawMarkers(csvSource); 
@@ -1221,7 +1288,7 @@ document.getElementById("xyzURL").style.width = "100%"
 
 // Hide controls and shadows or back to default state
 function switchVisibilityElements(isVisible, time=30000){
-    document.getElementById("btnBack").hidden = !isVisible;
+    document.getElementById("btnOnMapContainer").hidden = !isVisible;
     document.getElementsByClassName("leaflet-top leaflet-right")[0].hidden = !isVisible
     document.getElementsByClassName("leaflet-control-zoom")[0].hidden = !isVisible
 
@@ -1299,6 +1366,36 @@ firebase.initializeApp({
   projectId: 'treetom-d6ecb'
 });
 
+
+//Set share button listener
+document.getElementById("btnShare").addEventListener('click', openShareModal);
+
+
+function openShareModal(){
+  document.getElementById("btnOnMapContainer").style.visibility = "hidden";
+  if (getURLParemeters('id')){
+    document.getElementById("shareURL").value = window.location;
+    document.getElementById("shareInfo").style.display = "block";
+    document.getElementById("sharedWarning").style.display = "none";
+  }
+  else{
+    document.getElementById("shareInfo").style.display = "none";
+    document.getElementById("sharedWarning").style.display = "block";
+  }
+  document.getElementById("shareModal").style.display = "block";
+}
+
+
+var closeBtns = document.getElementsByClassName("close")[0];
+
+// When the user clicks on <span> (x), close the modal
+  closeBtns.onclick = function() {
+    document.getElementById("btnOnMapContainer").style.visibility = "visible";  
+    document.getElementById("shareModal").style.display = "none";
+}
+
+
+
 var db = firebase.firestore();
 
 
@@ -1316,6 +1413,7 @@ firebase.auth().signInAnonymously().catch(function(error) {
 //detect anonymous info login
 firebase.auth().onAuthStateChanged(function(user) {
   if (user) {
+    
     // User is signed in. Show share button, if not something happen
     // var uid = user.uid;
     // getURLParemeters()
@@ -1337,9 +1435,11 @@ firebase.auth().onAuthStateChanged(function(user) {
 
 
 //Launch save event checking if the user is logged or not
-function preSaveData(){
-  //If a ID is in the url, abort saving process
-  if (getURLParemeters('id')){return}
+function preSaveData(author=""){
+  //If a ID is in the url, abort saving process and show sharing modal
+  if (getURLParemeters('id')){
+    return
+  }
   //Detect if an anonymous user is linked to this session, else create one
   if (firebase.auth().currentUser){
     saveData()
@@ -1365,6 +1465,14 @@ function preSaveData(){
   .then(function(docRef) {
       // console.log("Document written with ID: ", docRef.id);
       addUrlParameter("id", docRef.id)
+      //show shareURL container
+      document.getElementById("shareURL").value = window.location;
+      document.getElementById("shareInfo").style.display = "block";
+      document.getElementById("sharedWarning").style.display = "none";
+
+      
+  
+
   })
   .catch(function(error) {
       console.error("Error adding document: ", error);
@@ -1386,6 +1494,7 @@ docRef.get().then(function(doc) {
     if (doc.exists) {
         data = doc.data()
         closeModal(data.tree, data.gps, data.customLayer)
+        // document.getElementById("btnShare").style.visibility = "hidden";
     } else {
         // doc.data() will be undefined in this case
         // console.log("No such document!");
@@ -1420,8 +1529,8 @@ function removeUrlParameter(name) {
     var searchParams = new URLSearchParams(window.location.search.slice(1))
     if(searchParams.has(name) === true){
     searchParams.delete(name)
-    // history.pushState(null, '', window.location.pathname);
-    window.location = window.location.pathname
+    history.pushState(null, '', window.location.pathname);
+    // window.location = window.location.pathname
     }
 }
 }
