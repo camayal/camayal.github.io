@@ -1518,7 +1518,8 @@ function preSaveData(author=""){
   function saveData(publicName=null, secretKey=null, author=""){
     db.collection("userTreeMaps").add({
       tree: document.getElementById("newickSource").value,
-      gps: document.getElementById("csvSource").value,
+      // gps: document.getElementById("csvSource").value,
+      gps: document.getElementById("csvSource").value.replace(/\n/g,'\\n'),
       // center: "none",
       // layer: "none",
       customLayer: document.getElementById("xyzURL").value,
@@ -1562,7 +1563,7 @@ var docRef = db.collection("userTreeMaps").doc(id);
 docRef.get().then(function(doc) {
     if (doc.exists) {
         data = doc.data()
-        closeModal(data.tree, data.gps, data.customLayer)
+        closeModal(data.tree, data.gps.replace(/\\n/g,"\n"), data.customLayer)
         p = data.tree;
         // document.getElementById("btnShare").style.visibility = "hidden";
         document.getElementById("authorInformation").innerHTML = data.author + ' ' + data.year + ' ' + '<a target="_blank" href="'+data.doi+'">'+data.doi+'</a>'
