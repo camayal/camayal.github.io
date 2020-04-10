@@ -88,7 +88,7 @@
       display:none;
     }
 
-    input{
+    #authorForm input{
       width:100%;
     }
 
@@ -135,13 +135,17 @@
 }
 
 .modal-share{
-  height: 30vh; 
+  height: 75vh; 
 }
 
 #shareInfo{
       display:none;
 }
 
+label{
+  font-weight: normal !important;
+  margin: 0px !important;
+}
 
 /* The Close Button */
 .close {
@@ -211,6 +215,18 @@ button:active {
 cursor:pointer;
 }
 
+.alertMsg{
+  color:#f73030;
+}
+
+
+#authorInformation{
+  background: #fff;
+  background: rgba(255, 255, 255, 0.7);
+  /* padding: 5px; */
+  font-weight: bold;
+}
+
 
 #exampleDescription, #author, #personalizedMapPrompt{
   font-weight: normal;
@@ -277,6 +293,7 @@ cursor:pointer;
     <div id="btnOnMapContainer">
       <button class="btnOnMap" id="btnBack" name="btnBack">Back</button>
       <button class="btnOnMap" id="btnShare" name="btnShare">Share</button>
+      <span id="authorInformation"></span>
     </div>
       <div id="mapid">
       </div>
@@ -337,7 +354,8 @@ cursor:pointer;
 
           <div>
       <button id="btnTreeToMap" name="btnTreeToMap" onclick="closeModal()">Tree to map</button>
-         
+         <br>
+         <br>
     </div>
     </div>
   
@@ -355,17 +373,32 @@ cursor:pointer;
     <span class="close">&times;</span>
     <div id="sharedWarning" class="textAreaColumn">
       <div>
-    <span>Before sharing this tree and map consider the following information:</span>
+    <span class="alertMsg">Before sharing this tree and map (treemap) consider the following information:</span>
     </div>
       <span>
-      - Everyone with the URL may see this treemap<br>
-      - URL generated is a permanent URL, neither tree or coordinates associated with this can change<br>
-      - URL removing is only allowed by request<br><br>
+        ➡ Everyone with the URL may see this treemap<br>
+        ➡ URL generated is a permanent URL, neither tree or coordinates associated with this can be modified<br>
+        ➡ Removing URL is only allowed by email request (you must use the same email address provided below)<br><br>
     </span>
+    <!-- <div>
+      <span>Authorship</span>
+    </div> -->
+    <div><span>You can provide some information about this data (you can leave empty all fields)</span></div>
+    <form id="authorForm">
+    <label for="authorship"> Lastname: </label>
+    <input type="text"  id="authorship" name="authorship" placeholder="e.g. Maya-Lastra" autocomplete="off" >
+    <label for="year"> Year: </label>
+    <input type="text"  id="year" name="year" placeholder="2017" autocomplete="off" >
+    <label for="doi"> DOI: </label>
+    <input type="url"  id="doi" name="doi" placeholder="DOI (URL format) associated with your publication, e.g. https://doi.org/10.3732/apps.1600035" autocomplete="off" onchange=testValidityForm(this)>
+    <label for="authorEmail"> Email address: </label>
+    <input type="email"  id="authorEmail" name="authorEmail" placeholder="" autocomplete="off" onchange=testValidityForm(this)>
+    </form>
     <div>
     <span>Do you want to share this treemap?</span>
   </div>
     <button id="btnShare" name="btnShare" onclick="preSaveData()">Generate URL to share</button>
+    <br><br>
   </div>
   <div id="shareInfo" class="textAreaColumn">
     <div>
@@ -386,7 +419,12 @@ cursor:pointer;
 
 
  <script>
-
+function testValidityForm(el){
+  if (el.validity.typeMismatch){
+    // document.getElementById('btnShare').disabled
+    console.log("bad type")
+    }
+}
 
 
 // Create object map and define controls of dragging map
@@ -464,7 +502,7 @@ L.control.zoom({
 
 
 // Add scale to map
-L.control.scale({metric:true, imperial:false}).addTo(window.map)
+L.control.scale({metric:true, imperial:false, position: 'bottomleft'}).addTo(window.map)
 
 
 
@@ -831,6 +869,7 @@ function addLine(id,x1,y1,x2,y2,stroke="Black",strokeWidth=1){
 // Control modal
 function openModal(){
     removeUrlParameter("id")
+    document.getElementById("authorForm").reset(); 
     document.getElementById("btnOnMapContainer").style.visibility = "hidden";
     document.getElementById("myModal").style.display = "block";
 }
@@ -1310,7 +1349,8 @@ document.getElementById("xyzURL").style.width = "100%"
 
 // Hide controls and shadows or back to default state
 function switchVisibilityElements(isVisible, time=30000){
-    document.getElementById("btnOnMapContainer").hidden = !isVisible;
+    document.getElementById("btnBack").hidden = !isVisible;
+    document.getElementById("btnShare").hidden = !isVisible;
     document.getElementsByClassName("leaflet-top leaflet-right")[0].hidden = !isVisible
     document.getElementsByClassName("leaflet-control-zoom")[0].hidden = !isVisible
 
@@ -1470,6 +1510,9 @@ function preSaveData(author=""){
     dbOperation = "save"
   }
 
+
+
+
   //Nested function
   //Save data in database
   function saveData(publicName=null, secretKey=null, author=""){
@@ -1482,7 +1525,10 @@ function preSaveData(author=""){
       // secretKey: secretKey,
       // publicName: publicName,
       userID:firebase.auth().currentUser.uid,
-      author: author,
+      author: document.getElementById("authorship").value,
+      year: document.getElementById("year").value,
+      doi: document.getElementById("doi").value,
+      email: document.getElementById("authorEmail").value, 
   })
   .then(function(docRef) {
       // console.log("Document written with ID: ", docRef.id);
@@ -1519,6 +1565,7 @@ docRef.get().then(function(doc) {
         closeModal(data.tree, data.gps, data.customLayer)
         p = data.tree;
         // document.getElementById("btnShare").style.visibility = "hidden";
+        document.getElementById("authorInformation").innerHTML = data.author + ' ' + data.year + ' ' + '<a target="_blank" href="'+data.doi+'">'+data.doi+'</a>'
     } else {
         // doc.data() will be undefined in this case
         // console.log("No such document!");
@@ -1572,6 +1619,7 @@ function addUrlParameter(name, value) {
     searchParams.set(name, value);
     var newRelativePathQuery = window.location.pathname + '?' + searchParams.toString();
     history.pushState(null, '', newRelativePathQuery);
+    document.getElementById("authorInformation").innerHTML = document.getElementById("authorship").value + ' ' + document.getElementById("year").value + ' ' + '<a target="_blank" href="'+document.getElementById("doi").value+'">'+document.getElementById("doi").value+'</a>'
 }else{
   window.alert("Your browser does not support this function")
 }
@@ -1584,6 +1632,7 @@ function removeUrlParameter(name) {
     searchParams.delete(name)
     history.pushState(null, '', window.location.pathname);
     // window.location = window.location.pathname
+    document.getElementById("authorInformation").innerHTML = ""
     }
 }
 }
