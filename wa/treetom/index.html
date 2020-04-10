@@ -88,6 +88,26 @@
       display:none;
     }
 
+    #authorForm input{
+      width:100%;
+    }
+
+
+    #shareURL{
+ width:100%;
+ height:32px;
+ line-height:32px;
+ color:rgb(0, 0, 0);
+ background-color:#fff;
+ border:1px solid rgb(201, 201, 201);
+ border-radius:3px;
+ padding:3px;
+ box-shadow: 0 0 1px rgba(0,0,0,0.65);
+}
+
+
+
+
     /* The Modal (background) */
 .modal {
   display: none; /* Hidden by default */
@@ -107,10 +127,40 @@
 .modal-content {
   background-color: #fefefe;
   margin: auto;
-  padding: 20px;
+  padding: 2.5vh;
   border: 1px solid #888;
   width: 80%;
-  
+  height: 90vh; /* Full height */
+  overflow: auto;
+}
+
+.modal-share{
+  height: 75vh; 
+}
+
+#shareInfo{
+      display:none;
+}
+
+label{
+  font-weight: normal !important;
+  margin: 0px !important;
+}
+
+/* The Close Button */
+.close {
+  color: #aaaaaa;
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+  user-select: none;
+}
+
+.close:hover,
+.close:focus {
+  color: #000;
+  text-decoration: none;
+  cursor: pointer;
 }
 
 .ascii-art {
@@ -118,6 +168,7 @@
     white-space: pre;
     line-height: 1.15em;
 }
+
 
 
 button {
@@ -141,23 +192,39 @@ button:hover {
 	background-color:#f6f6f6;
 }
 button:active {
-	position:relative;
+	/* position:relative; */
 	top:1px;
   outline: none;
 }
 
-#btnBack {
+#btnOnMapContainer{
   visibility: hidden;
   z-index: 99999;
   margin-left: 30.5%;
   margin-top: 0.5%;
   position:absolute;
-  box-shadow: 0 0 2px rgba(0,0,0,0.65);
+}
+
+
+.btnOnMap{
+  box-shadow: 0 0 1px rgba(0,0,0,0.65);
   border:1px solid #ccc;
 }
 
 .link{
 cursor:pointer;
+}
+
+.alertMsg{
+  color:#f73030;
+}
+
+
+#authorInformation{
+  background: #fff;
+  background: rgba(255, 255, 255, 0.7);
+  /* padding: 5px; */
+  font-weight: bold;
 }
 
 
@@ -169,6 +236,9 @@ cursor:pointer;
 .twitter-follow-button{
     float: right;
 }
+
+
+
 
   </style>
 
@@ -203,10 +273,11 @@ cursor:pointer;
 
 
     
-
+    
+    
 </head>
 
-<body onload="openModal()">
+<body onload="loadWebsite()">
 
 <!-- tree -->
     <div id="treeContainer">
@@ -219,7 +290,11 @@ cursor:pointer;
 
 
 <!-- map -->
-      <button id="btnBack" name="btnBack">Back</button>
+    <div id="btnOnMapContainer">
+      <button class="btnOnMap" id="btnBack" name="btnBack">Back</button>
+      <button class="btnOnMap" id="btnShare" name="btnShare">Share</button>
+      <span id="authorInformation"></span>
+    </div>
       <div id="mapid">
       </div>
 
@@ -279,6 +354,8 @@ cursor:pointer;
 
           <div>
       <button id="btnTreeToMap" name="btnTreeToMap" onclick="closeModal()">Tree to map</button>
+         <br>
+         <br>
     </div>
     </div>
   
@@ -286,24 +363,72 @@ cursor:pointer;
 
 
   
-
-
+  
 
 
 </div>
 
-
+<div id="shareModal" class="modal">
+  <div class="modal-content modal-share">
+    <span class="close">&times;</span>
+    <div id="sharedWarning" class="textAreaColumn">
+      <div>
+    <span class="alertMsg">Before sharing this tree and map (treemap) consider the following information:</span>
+    </div>
+      <span>
+        • Everyone with the URL may see this treemap<br>
+        • URL generated is a permanent URL, neither tree or coordinates associated with this can be modified<br>
+        • Removing URL is only allowed by email request (you must use the same email address provided below)<br><br>
+    </span>
+    <!-- <div>
+      <span>Authorship</span>
+    </div> -->
+    <div><span>You can provide some information about this data (you can leave empty all fields)</span></div>
+    <form id="authorForm">
+    <label for="authorship"> Lastname: </label>
+    <input type="text"  id="authorship" name="authorship" placeholder="e.g. Maya-Lastra" autocomplete="off" >
+    <label for="year"> Year: </label>
+    <input type="text"  id="year" name="year" placeholder="2017" autocomplete="off" >
+    <label for="doi"> DOI: </label>
+    <input type="url"  id="doi" name="doi" placeholder="DOI (URL format) associated with your publication, e.g. https://doi.org/10.3732/apps.1600035" autocomplete="off" onchange=testValidityForm(this)>
+    <label for="authorEmail"> Email address: </label>
+    <input type="email"  id="authorEmail" name="authorEmail" placeholder="" autocomplete="off" onchange=testValidityForm(this)>
+    </form>
+    <div>
+    <span>Do you want to share this treemap?</span>
+  </div>
+    <button id="btnShare" name="btnShare" onclick="preSaveData()">Generate URL to share</button>
+    <br><br>
+  </div>
+  <div id="shareInfo" class="textAreaColumn">
+    <div>
+    <span>Use the following link to share this treemap</span>
+  </div>
+  <div>
+    <input  type="text" id="shareURL" autocomplete="off" onClick="this.setSelectionRange(0, this.value.length)">
+  </div>
+  <div>
+    <button id="btnCopy" onclick="copyToClipboard(document.getElementById('shareURL').value)">Copy to clipboard</button>
+  </div>
+  </div>
+  </div>
+</div>
 
 
 <ul id="d3_layout_phylotree_context_menu" class="dropdown-menu" role="menu" style="display: none;"><il></il></ul>
 
 
  <script>
-
+function testValidityForm(el){
+  if (el.validity.typeMismatch){
+    // document.getElementById('btnShare').disabled
+    console.log("bad type")
+    }
+}
 
 
 // Create object map and define controls of dragging map
-function drawMap(){
+function drawMap(xyzurl){
   //clean map in case it is
   if (window.map != undefined) { 
     map.remove(); 
@@ -357,8 +482,9 @@ var overlays = {
 //   "Personalized map": L.tileLayer('http://earthengine.google.org/static/hansen_2013/gain/{z}/{x}/{y}.png')
 }
 
-if (document.getElementById("xyzURL").value){
-  overlays["Personalized layer"] = L.tileLayer(document.getElementById("xyzURL").value).addTo(window.map)
+// if (document.getElementById("xyzURL").value){
+if (xyzurl){
+  overlays["Personalized layer"] = L.tileLayer(xyzurl).addTo(window.map)
   // overlays["Personalized layer"].addTo(map);
 }
 
@@ -376,7 +502,7 @@ L.control.zoom({
 
 
 // Add scale to map
-L.control.scale({metric:true, imperial:false}).addTo(window.map)
+L.control.scale({metric:true, imperial:false, position: 'bottomleft'}).addTo(window.map)
 
 
 
@@ -422,10 +548,11 @@ window.map.on('zoomstart', function(e) {
 
 
 
-function drawMarkers(){
+function drawMarkers(csvSource){
 try{
 // Get csv from textarea
-csvString = document.getElementById("csvSource").value.trim()
+// csvString = document.getElementById("csvSource").value.trim()
+csvString = csvSource.trim()
 csvString = csvString.replace(/\n\s*\n/g, '\n');
 markersJSONString = csv2json(csvString)
 
@@ -457,7 +584,7 @@ catch(error){
 
 
 
-function drawTree(){
+function drawTree(newickSource){
 //Tree plot example
 
 //Show attribution of Phylotree
@@ -500,10 +627,10 @@ window.tree = d3.layout.phylotree()
 
 
 // Get newick string
-newick = document.getElementById("newickSource").value
+// newick = document.getElementById("newickSource").value
 
 // Plot tree
-tree(newick).layout(true);
+tree(newickSource).layout(true);
 
 
 }
@@ -741,19 +868,34 @@ function addLine(id,x1,y1,x2,y2,stroke="Black",strokeWidth=1){
 
 // Control modal
 function openModal(){
-    document.getElementById("btnBack").style.visibility = "hidden";
+    removeUrlParameter("id")
+    document.getElementById("authorForm").reset(); 
+    document.getElementById("btnOnMapContainer").style.visibility = "hidden";
     document.getElementById("myModal").style.display = "block";
 }
 
-function closeModal(){
-  newickSource = document.getElementById("newickSource").value
-  csvSource = document.getElementById("csvSource").value
+
+function closeModal(newickSource=null,csvSource=null,xyzurl=null){
+  if (newickSource == null){
+      newickSource = document.getElementById("newickSource").value
+      p = newickSource;
+  }
+  if (csvSource == null){
+      csvSource = document.getElementById("csvSource").value
+  }
+  if (xyzurl == null){
+    xyzurl = document.getElementById("xyzURL").value
+  }
+
+
+  
+
   if (newickSource != "" & csvSource != ""){
-    document.getElementById("btnBack").style.visibility = "visible";  
+    document.getElementById("btnOnMapContainer").style.visibility = "visible";  
     document.getElementById("myModal").style.display = "none";
-    drawMap(); 
-    drawMarkers(); 
-    drawTree();
+    drawMap(xyzurl); 
+    drawMarkers(csvSource); 
+    drawTree(newickSource);
     centerView();
     
   }else{
@@ -765,7 +907,7 @@ function closeModal(){
 // Control reprinting tree useful for resizing
 function redrawTree(){
   if(document.getElementById("myModal").style.display == "none"){
-    drawTree()
+    drawTree(p)
     // drawLines_MapPerspective()
     // markIncomplete()
     setTimeout(function () {
@@ -777,7 +919,9 @@ function redrawTree(){
 }
 
 //Listener for resizing screen
-window.addEventListener("resize", redrawTree);
+window.addEventListener("resize", function(){
+  redrawTree()
+});
 
 
 window.addEventListener('beforeprint', function(){
@@ -1206,6 +1350,7 @@ document.getElementById("xyzURL").style.width = "100%"
 // Hide controls and shadows or back to default state
 function switchVisibilityElements(isVisible, time=30000){
     document.getElementById("btnBack").hidden = !isVisible;
+    document.getElementById("btnShare").hidden = !isVisible;
     document.getElementsByClassName("leaflet-top leaflet-right")[0].hidden = !isVisible
     document.getElementsByClassName("leaflet-control-zoom")[0].hidden = !isVisible
 
@@ -1221,6 +1366,303 @@ function switchVisibilityElements(isVisible, time=30000){
 }
 
 
+var dbOperation = null;
+// var globalId = null;
+
+//Detect if URL has some urlsearch paremeter, if not open modal
+// function getURLParemeters(){
+//   if ('URLSearchParams' in window) {
+//     var searchParams = new URLSearchParams(window.location.search.slice(1))
+//     if(searchParams.has('id') === true & searchParams.get('id') != ""){
+//       // loadData(searchParams.get('id'))
+//       globalId = searchParams.get('id')
+//       dbOperation = "load"
+//       //Change button text Back for New
+//       // document.getElementById("btnBack").innerText = "New";
+//     }else{
+//       openModal()
+//     }
+
+// }else{//if browser is not capable also open modal
+//   openModal()
+//   window.alert("Your browser does not support this function")
+// }
+// }
+
+function getURLParemeters(name){
+  if ('URLSearchParams' in window) {
+    var searchParams = new URLSearchParams(window.location.search.slice(1))
+    if(searchParams.has(name) === true & searchParams.get(name) != ""){
+      return searchParams.get(name)
+    }else{
+      return null
+    }
+}
+}
+
+function loadWebsite(){
+  if (getURLParemeters("id")){
+    dbOperation = "load"
+    logInFireBase()
+  }else{
+    openModal()
+  }
+}
+
+
+</script>
+
+
+<script src="https://www.gstatic.com/firebasejs/7.9.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/7.9.1/firebase-firestore.js"></script>
+<script src="https://www.gstatic.com/firebasejs/7.9.1/firebase-auth.js"></script>
+<!-- <script src="https://www.gstatic.com/firebasejs/7.9.1/firebase-analytics.js"></script> -->
+
+<script>
+//Share functionality starts here
+
+// Initialize Cloud Firestore through Firebase
+firebase.initializeApp({
+  apiKey: 'AIzaSyDYt-gk2PBj1R669o33mhtsi9KlT99j9pQ',
+  authDomain: 'https://camayal.info',
+  projectId: 'treetom-d6ecb'
+});
+
+
+//Set share button listener
+document.getElementById("btnShare").addEventListener('click', openShareModal);
+
+
+function openShareModal(){
+  document.getElementById("btnOnMapContainer").style.visibility = "hidden";
+  if (getURLParemeters('id')){
+    document.getElementById("shareURL").value = window.location;
+    document.getElementById("shareInfo").style.display = "block";
+    document.getElementById("sharedWarning").style.display = "none";
+  }
+  else{
+    document.getElementById("shareInfo").style.display = "none";
+    document.getElementById("sharedWarning").style.display = "block";
+  }
+  document.getElementById("shareModal").style.display = "block";
+}
+
+
+var closeBtns = document.getElementsByClassName("close")[0];
+
+// When the user clicks on <span> (x), close the modal
+  closeBtns.onclick = function() {
+    document.getElementById("btnOnMapContainer").style.visibility = "visible";  
+    document.getElementById("shareModal").style.display = "none";
+}
+
+
+
+var db = firebase.firestore();
+
+
+function logInFireBase(){
+//anonymous autorization
+firebase.auth().signInAnonymously().catch(function(error) {
+  // Handle Errors here.
+  var errorCode = error.code;
+  var errorMessage = error.message;
+  // ...
+});
+}
+
+
+//detect anonymous info login
+firebase.auth().onAuthStateChanged(function(user) {
+  if (user) {
+    
+    // User is signed in. Show share button, if not something happen
+    // var uid = user.uid;
+    // getURLParemeters()
+    if (dbOperation == "load"){
+      loadData(getURLParemeters("id"))
+      dbOperation = null
+    }
+    if(dbOperation == "save"){
+      saveData()
+      dbOperation = null
+    }
+  } 
+  // else {
+  //   // User is signed out. or never sign in not show share button
+  //   // openModal()
+  //   // window.alert("Your browser does not support this function")
+  // }
+});
+
+
+//Launch save event checking if the user is logged or not
+function preSaveData(author=""){
+  //If a ID is in the url, abort saving process and show sharing modal
+  if (getURLParemeters('id')){
+    return
+  }
+  //Detect if an anonymous user is linked to this session, else create one
+  if (firebase.auth().currentUser){
+    saveData()
+  }else{
+    logInFireBase()
+    dbOperation = "save"
+  }
+
+
+
+
+  //Nested function
+  //Save data in database
+  function saveData(publicName=null, secretKey=null, author=""){
+    db.collection("userTreeMaps").add({
+      tree: document.getElementById("newickSource").value,
+      gps: document.getElementById("csvSource").value,
+      // center: "none",
+      // layer: "none",
+      customLayer: document.getElementById("xyzURL").value,
+      // secretKey: secretKey,
+      // publicName: publicName,
+      userID:firebase.auth().currentUser.uid,
+      author: document.getElementById("authorship").value,
+      year: document.getElementById("year").value,
+      doi: document.getElementById("doi").value,
+      email: document.getElementById("authorEmail").value, 
+  })
+  .then(function(docRef) {
+      // console.log("Document written with ID: ", docRef.id);
+      addUrlParameter("id", docRef.id)
+      //show shareURL container
+      document.getElementById("shareURL").value = window.location;
+      document.getElementById("shareInfo").style.display = "block";
+      document.getElementById("sharedWarning").style.display = "none";
+
+      
+  
+
+  })
+  .catch(function(error) {
+      console.error("Error adding document: ", error);
+      window.alert("Error saving tree and coordinates in the database")
+  });
+
+  }
+
+
+}
+
+
+var p = "";
+//Load data from Firebase
+function loadData(id){
+
+var docRef = db.collection("userTreeMaps").doc(id);
+
+docRef.get().then(function(doc) {
+    if (doc.exists) {
+        data = doc.data()
+        closeModal(data.tree, data.gps, data.customLayer)
+        p = data.tree;
+        // document.getElementById("btnShare").style.visibility = "hidden";
+        document.getElementById("authorInformation").innerHTML = data.author + ' ' + data.year + ' ' + '<a target="_blank" href="'+data.doi+'">'+data.doi+'</a>'
+    } else {
+        // doc.data() will be undefined in this case
+        // console.log("No such document!");
+        //if fails load open modal
+        // openModal()
+        // window.alert("Tree and coordinates associated with "+id+" are not available")
+        loadPremiumKey(id)
+    }
+}).catch(function(error) {
+    console.log("Error getting document:", error);
+    openModal()
+});
+
+
+
+}
+
+
+function loadPremiumKey(id){
+
+var docRef = db.collection("properNameKeys").doc(id);
+var result = "";
+
+docRef.get().then(function(doc) {
+    if (doc.exists) {
+        data = doc.data()
+        
+        loadData(data.id)
+    } else {
+        // doc.data() will be undefined in this case
+        // console.log("No such document!");
+        //if fails load open modal
+        openModal()
+        window.alert("Tree and coordinates associated with "+id+" are not available")
+    }
+}).catch(function(error) {
+    console.log("Error getting document:", error);
+    openModal()
+});
+
+
+
+}
+
+
+
+//Modify the current URL to show the identificator
+function addUrlParameter(name, value) {
+  if ('URLSearchParams' in window) {
+    var searchParams = new URLSearchParams(window.location.search)
+    searchParams.set(name, value);
+    var newRelativePathQuery = window.location.pathname + '?' + searchParams.toString();
+    history.pushState(null, '', newRelativePathQuery);
+    document.getElementById("authorInformation").innerHTML = document.getElementById("authorship").value + ' ' + document.getElementById("year").value + ' ' + '<a target="_blank" href="'+document.getElementById("doi").value+'">'+document.getElementById("doi").value+'</a>'
+}else{
+  window.alert("Your browser does not support this function")
+}
+}
+
+function removeUrlParameter(name) {
+  if ('URLSearchParams' in window) {
+    var searchParams = new URLSearchParams(window.location.search.slice(1))
+    if(searchParams.has(name) === true){
+    searchParams.delete(name)
+    history.pushState(null, '', window.location.pathname);
+    // window.location = window.location.pathname
+    document.getElementById("authorInformation").innerHTML = ""
+    }
+}
+}
+
+window.addEventListener('popstate', (event) => {
+  console.log(event);
+});
+
+
+
+
+function copyToClipboard(text){
+ var pretext = document.getElementById("btnCopy").innerText
+navigator.clipboard.writeText(text).then(function() {
+  // console.log('Async: Copying to clipboard was successful!');
+  document.getElementById("btnCopy").style.minWidth =  document.getElementById("btnCopy").offsetWidth
+  document.getElementById("btnCopy").innerText = "Copied!"
+  setTimeout(function () {
+  document.getElementById("btnCopy").innerText = pretext
+}, 2000);
+}, function(err) {
+  // console.error('Async: Could not copy text: ', err);
+  document.getElementById("btnCopy").innerText = "Failed to copy, select and use Ctrl+C (or Cmd+C) instead"
+  document.getElementById("btnCopy").disabled = true;
+});
+}
+
+
+
+
 
 (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
   (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
@@ -1229,7 +1671,7 @@ function switchVisibilityElements(isVisible, time=30000){
   ga('create', 'UA-56235798-1', 'auto');
   ga('require', 'displayfeatures');
   ga('send', 'pageview');
-
 </script>
+
 </body>
 </html>
