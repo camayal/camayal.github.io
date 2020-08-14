@@ -51,14 +51,14 @@
       position: absolute;
       top: 0px;
       left: 0px;
-      z-index: 400;
+      z-index: 1000;
       background-color: transparent;
       pointer-events: none; 
       
     }
 
     .dropdown-menu {
-      z-index: 9999;
+      z-index: 20000;
     }
 
 
@@ -240,7 +240,6 @@ cursor:pointer;
 
 
 
-
   </style>
 
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css"
@@ -264,7 +263,7 @@ cursor:pointer;
   <script src="https://d3js.org/d3.v3.min.js" charset="utf-8"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.3/underscore-min.js" charset="utf-8"></script>
   <script type='text/javascript' src='phylotree.js'></script>
-
+  
 
 
     <!-- Load Esri Leaflet from CDN -->
@@ -331,7 +330,7 @@ cursor:pointer;
 </textarea>
           </div>
           <div>
-            <span>Coordinates CSV format (No headers) - columns: name, lat, lng [optional: <a target=”_blank” href="https://en.wikipedia.org/wiki/Web_colors">webNameColor</a>, or let TreeToM <a id="magicColors" class="link" onclick="magicColors();" title="Click here and TreeToM will use k-mers to group your taxa and suggest some colors">tries some colors for you</a>]</span>
+            <span>Coordinates CSV format (No headers) - columns: name, lat, lng [optional: <a target=”_blank” href="https://en.wikipedia.org/wiki/Web_colors">webNameColor</a>]</span>
             
 <textarea id="csvSource" placeholder="Enter CSV files with name, lat and long or drag a drop a CSV file from your computer">
 </textarea>
@@ -520,7 +519,7 @@ var lessPerformance = false;
 // Redraw lines when map is moved
 if (lessPerformance){
   window.map.on('movestart', function(e) {
-    // Clear svg object (maybe check a fifferent solution than jquery)
+    // Clear svg object (maybe check a fifferent solution than jquary)
     $("#linesContainer").empty();
   });
 
@@ -572,11 +571,8 @@ for ( var i=0; i < markersJSONString.length; ++i )
     colorMarker = "black"
   }
 
-
-
      L.circleMarker( [markersJSONString[i].lat, markersJSONString[i].lng], {color:colorMarker, opacity: 1.0, fillOpacity: 1.0, weight: 2, radius: 3})
       .bindPopup( markersJSONString[i].name)
-      .bindTooltip(markersJSONString[i].name, {direction: "right"} )
       .addTo(window.fg);
 }
 }
@@ -629,42 +625,15 @@ window.tree = d3.layout.phylotree()
   .node_circle_size(1); // do not show "circles" at internal nodes
 
 
+
 // Get newick string
 // newick = document.getElementById("newickSource").value
 
 // Plot tree
 tree(newickSource).layout(true);
 
+
 }
-
-
-//Inserted function in phylotree.js code to call things after rerooting
-function reroot_update(){
-  sort_nodes (true);
-
-setTimeout(function () {
-  drawLines_MapPerspective()
-  markIncomplete()
-}, 300);
-}
-
-
-
-// Function from http://phylotree.hyphy.org/ to sort branches, used after root
-function sort_nodes (asc) {
-    window.tree.traverse_and_compute (function (n) {
-            var d = 1;
-            if (n.children && n.children.length) {
-                d += d3.max (n.children, function (d) { return d["count_depth"];});
-            }
-            n["count_depth"] = d;
-        });
-        window.tree.resort_children (function (a,b) {
-            return (a["count_depth"] - b["count_depth"]) * (asc ? 1 : -1);
-        });
-}
-
-
 
 
 // center view to show all markers an plot lines
@@ -838,26 +807,17 @@ function drawLines_MapPerspective(){
 }
 }
 
-//Mark those tips  that do not match, create unique list only first time map is shown
-var firstMark = true;
-var leavesUnique
-var markersUnique
+//Mark those tips  that do not match 
 function markIncomplete(){
-  if (firstMark){
-
-    var leaves = inScreenLeaves()
-    var markers = inScreenMarkers()
-    leavesUnique = Object.keys(leaves).filter((o) => Object.keys(markers).indexOf(o) === -1);
-    markersUnique = Object.keys(markers).filter((o) => Object.keys(leaves).indexOf(o) === -1);
-    firstMark = false
-}
+  var leaves = inScreenLeaves()
+  var markers = inScreenMarkers()
+  var leavesUnique = Object.keys(leaves).filter((o) => Object.keys(markers).indexOf(o) === -1);
+  var markersUnique = Object.keys(markers).filter((o) => Object.keys(leaves).indexOf(o) === -1);
 
   for (x in leavesUnique){
   var nameNode = "node-" + leavesUnique[x]
-  //  document.getElementById(nameNode).style.textDecoration = "line-through"   
-  // document.getElementById(nameNode).style.fontStyle = "italic"
-  document.getElementById(nameNode).style.fill = "gray"
-}
+   document.getElementById(nameNode).style.textDecoration = "line-through"   
+  }
 
   
 }
@@ -908,7 +868,6 @@ function addLine(id,x1,y1,x2,y2,stroke="Black",strokeWidth=1){
 
 // Control modal
 function openModal(){
-    document.getElementById("btnBack").innerText = "Back";
     removeUrlParameter("id")
     document.getElementById("authorForm").reset(); 
     document.getElementById("btnOnMapContainer").style.visibility = "hidden";
@@ -1608,8 +1567,6 @@ docRef.get().then(function(doc) {
         p = data.tree;
         // document.getElementById("btnShare").style.visibility = "hidden";
         document.getElementById("authorInformation").innerHTML = data.author + ' ' + data.year + ' ' + '<a target="_blank" href="'+data.doi+'">'+data.doi+'</a>'
-        document.getElementById("btnBack").innerText = "New";
-
     } else {
         // doc.data() will be undefined in this case
         // console.log("No such document!");
@@ -1664,8 +1621,6 @@ function addUrlParameter(name, value) {
     var newRelativePathQuery = window.location.pathname + '?' + searchParams.toString();
     history.pushState(null, '', newRelativePathQuery);
     document.getElementById("authorInformation").innerHTML = document.getElementById("authorship").value + ' ' + document.getElementById("year").value + ' ' + '<a target="_blank" href="'+document.getElementById("doi").value+'">'+document.getElementById("doi").value+'</a>'
-    document.getElementById("btnBack").innerText = "New";
-
 }else{
   window.alert("Your browser does not support this function")
 }
@@ -1705,202 +1660,6 @@ navigator.clipboard.writeText(text).then(function() {
   document.getElementById("btnCopy").disabled = true;
 });
 }
-
-
-////Coloring 
-// Calculate differences between two strings using kmers
-function dif_by_kmering(string1, string2, k=3){
-  //remove numbers and no characters and put lowercase
-  string1 = string1.replace(/[^A-z]/g,"").toLowerCase();
-  string2 = string2.replace(/[^A-z]/g,"").toLowerCase();
-
-  //get kmers for each string
-  var gram1 = []
-  for(var i = 0; i < string1.length - k + 1; i++){
-    gram1.push(string1.slice(i, i + k))
-  }
-  var gram2 = []
-  for(var i = 0; i < string2.length - k + 1; i++){
-    gram2.push(string2.slice(i, i + k))
-  }
-  //Create a set with both list
-  unique = [... new Set(gram1.concat(gram2))]
-  //Iterate to get only match k-mers
-  var match = gram1.filter(function(x) {
-      if(gram2.indexOf(x) !=- 1)
-          return true;
-      else
-          return false;
-  });
-  // create Set that will eliminite duplicates
-  var match = [...new Set(match)];
-  
-  return match.length/unique.length
-}
-
-
-//List of nice colors
-const CSS_COLOR_NAMES = [ "DarkRed", "Green", "Blue", "OrangeRed", "Gold", "Brown", "CadetBlue", "Purple", "BurlyWood", "Chocolate", "Coral", "CornflowerBlue", "Crimson", "Cyan", "DarkBlue", "DarkCyan", "DarkGoldenRod", "DarkGray", "DarkGrey", "DarkGreen", "DarkKhaki", "DarkOliveGreen", "DarkOrange", "DarkOrchid", "DarkSalmon", "DarkSeaGreen", "DarkSlateBlue", "DarkSlateGray", "DarkSlateGrey", "DarkTurquoise", "DarkViolet", "DeepPink", "DeepSkyBlue", "DimGray", "DimGrey", "DodgerBlue", "FireBrick", "ForestGreen", "Fuchsia", "GoldenRod", "Gray", "Grey", "GreenYellow", "HotPink", "IndianRed", "Indigo", "Khaki", "LawnGreen", "LightCoral", "LightGrey", "LightGreen", "LightSalmon", "LightSeaGreen", "LightSlateGray", "LightSlateGrey", "LightSteelBlue", "Lime", "LimeGreen", "Maroon", "MediumAquaMarine", "MediumOrchid", "MediumPurple", "MediumSeaGreen", "MediumSpringGreen", "MediumTurquoise", "MediumVioletRed", "MidnightBlue", "Moccasin", "NavajoWhite", "Olive", "OliveDrab", "Orange", "Orchid", "PaleGoldenRod", "PaleTurquoise", "PaleVioletRed", "PapayaWhip", "PeachPuff", "Peru", "Pink", "Plum", "PowderBlue", "RebeccaPurple", "Red", "RosyBrown", "RoyalBlue", "SaddleBrown", "Salmon", "SandyBrown", "SeaGreen", "Sienna", "SkyBlue", "SlateBlue", "SlateGray", "SlateGrey", "SpringGreen", "SteelBlue", "Tan", "Teal", "Thistle", "Tomato", "Turquoise", "Violet", "Wheat", "Yellow", "YellowGreen"];
-
-
-// Group elements by kmers similarity
-function grouping_by_kmering(strings, k=3, p=0.5){
-  // Define empty elements
-  var result = {}
-  var already_included = []
-  var total_dif = []
-  var list_colors = []
-  var list_names = []
-  
-  // Remove duplicates of strings and sort all of them
-  strings = [... new Set(strings)]
-  strings.sort()
-  
-  // Iterate and compare all strings vs all strings and get dif by kmers
-  for (var i = 0; i < strings.length; i++) {
-    total_dif.push([])
-    for (var j = 0; j < strings.length; j++) {
-      var dif = dif_by_kmering(strings[i],strings[j], k)
-      // Save differences in a array matrix-like
-      total_dif[i].push(dif)
-      
-    }
-   
-  }
-
-  // For each array of differences calculate average and
-  for (var x = 0; x < total_dif.length; x++) {
-   
-    // Sum all elements in each 1d array
-    // var sum = 0;
-    // for (var i_dif = 0; i_dif < total_dif[x].length; i_dif++) {
-    //   sum += total_dif[x][i_dif];
-    // }
-    // // Get average for that particular sub set of difs
-    // var average = sum / total_dif[x].length
-    
-    
-    var taxon_x = strings[x]
-    result[taxon_x] = []
-    
-    
-    // Again same loop (needed because in previous only average is calculated)
-    for (var y = 0; y < total_dif[x].length; y++) {
-      var taxon_y = strings[y]
-      // Check if difference is greater to the average, considering it as the same group
-      if (total_dif[x][y] >= p){
-        
-        // If taxon_y was not tested before push it in the parameters into result object
-        if (!already_included.includes(taxon_y)){
-           result[taxon_x].push(taxon_y)
-           already_included.push(taxon_y)
-        }
-      }
-    }
-    
-    
-  }
-
-
-// //Function to create colors based on hue
-// function makeColor(colorNum, colors){
-//     if (colors < 1) colors = 1; // defaults to one color - avoid divide by zero
-//     var hue = colorNum * (360 / colors) % 360;
-
-//     return hslToRgb(hue, 100, 50)
-// }
-
-
-
-
-
-//Colorize only groups with elements
-var seed_color = 0
-var num_groups = Object.keys(result).length
-
-for (var propName in result) {
-    if (result[propName].length > 0) {
-
-      
-      //check if the number of groups is bigger than the safe colors list to generate them randomly
-      if (num_groups > CSS_COLOR_NAMES.length){
-        color = "#" + Math.floor((Math.abs(Math.sin(seed_color) * 16777215)) % 16777215).toString(16);
-      }else{
-        color = CSS_COLOR_NAMES[seed_color]
-      }
-      // color = makeColor(seed_color, num_groups)
-//       result_colorized[color] = result[propName]
-      list_colors.push(color)
-      list_names.push(result[propName])
-
-      seed_color++
-    }
-  }
-
-//Return a list with two lists, [0] colors, [1] lists of names, both indexes are the same
-return [list_colors, list_names];  
-}
-
-
-
-//k-meric magic for coloring
-function magicColors(k=3, p=0.5){
-  var csvSource = document.getElementById("csvSource")
-
-  //Check if the csvSource is not empty
-  if (csvSource.value != ""){
-    try{
-      //Get all lines
-      var lines=csvSource.value.split("\n");
-      var result = [];
-      //Test if is 3 or 4 columns, if 4, show alert that
-      if (lines[0].split(",").length > 3){
-        window.alert("Your CSV table already has a color column. Nothing to color here.");
-      }else{
-        //In case only 3 columns, extract strings
-
-        strings = []
-        for(var i=0;i<lines.length;i++){
-          if (lines[i] != ""){
-            strings.push(lines[i].split(",")[0])
-          }      
-        }
-
-        //Create object with colors and new CSV string
-        var colorNamesLists = grouping_by_kmering(strings, k, p)
-        var newCSV = ""
-
-        //Again iterate over entire csv, TODO, see a no redundant way to do it
-        //This time to put colors in csv
-        for(var i=0;i<lines.length;i++){
-          if (lines[i] != ""){
-          //Find the index in second part of the list generated by grouping by kmers (indexOf return -1 if the element is not in the array)
-          //return the index of the group that is the same of index of the color
-          index_color = colorNamesLists[1].findIndex(function (element) { 
-            return element.indexOf(lines[i].split(",")[0]) > -1
-          }); 
-          //Crete a new line with the new color information (adding #)
-          
-            newCSV += lines[i] + ", " + colorNamesLists[0][index_color] + "\n"
-          }
-         
-        }
-        csvSource.value = newCSV
-      }
-    }
-    catch(error){
-      console.log("Error: magicColors failed. " + error)
-    }
-  }else{
-    window.alert("Nothing to color, enter csv formated lat-long information to continue");
-  }
-}
-
-
-
-
-
-
 
 
 
