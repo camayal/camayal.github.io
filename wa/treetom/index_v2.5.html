@@ -310,7 +310,7 @@ cursor:pointer;
 
     <!-- Modal content -->
     <div class="modal-content">
-        <a href="https://twitter.com/camayal_?ref_src=twsrc%5Etfw" class="twitter-follow-button" data-show-count="false">Follow @camayal_</a><script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+        <!-- <a href="https://twitter.com/camayal_?ref_src=twsrc%5Etfw" class="twitter-follow-button" data-show-count="false">Follow @camayal_</a><script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script> -->
         <div id="title" class="ascii-art">
    ╔╦╗┬─┐┌─┐┌─┐╔╦╗┌─┐╔╦╗
     ║ ├┬┘├┤ ├┤  ║ │ │║║║
@@ -675,13 +675,13 @@ setTimeout(function () {
 
 // Function from http://phylotree.hyphy.org/ to sort branches, used after root
 function sort_nodes (asc) {
-    window.tree.traverse_and_compute (function (n) {
-            var d = 1;
-            if (n.children && n.children.length) {
-                d += d3.max (n.children, function (d) { return d["count_depth"];});
-            }
-            n["count_depth"] = d;
-        });
+    // window.tree.traverse_and_compute (function (n) {
+    //         var d = 1;
+    //         if (n.children && n.children.length) {
+    //             d += d3.max (n.children, function (d) { return d["count_depth"];});
+    //         }
+    //         n["count_depth"] = d;
+    //     });
         window.tree.resort_children (function (a,b) {
             return (a["count_depth"] - b["count_depth"]) * (asc ? 1 : -1);
         });
