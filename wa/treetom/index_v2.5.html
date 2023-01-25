@@ -263,8 +263,8 @@ cursor:pointer;
   <script src="https://d3js.org/d3.v3.min.js" charset="utf-8"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.3/underscore-min.js" charset="utf-8"></script>
   
-  <!-- <script type='text/javascript' src='phylotree_rotation.js'></script> -->
-  <script type='text/javascript' src='phylotree_dist.js'></script>
+  <script type='text/javascript' src='phylotree_rotation.js'></script>
+  <!-- <script type='text/javascript' src='phylotree_dist.js'></script> -->
 
 
     <!-- Load Esri Leaflet from CDN -->
@@ -621,6 +621,7 @@ window.tree = d3.layout.phylotree()
     // (Boolean) Determines whether or not zooming is enabled. Defaults to false.
     'zoom': false,
     'reroot': true,
+    'rotate': true,
     "hide": false,
     // Add id for every leaf
     "label-nodes-with-name": true,

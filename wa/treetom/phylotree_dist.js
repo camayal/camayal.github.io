@@ -2520,6 +2520,20 @@
                 this.update();
               });
           }
+
+
+          if (options["rotate"]) {
+            menu_object
+              .append("a")
+              .attr("class", "dropdown-item")
+              .attr("tabindex", "-1")
+              .text("Rotate this " + (isLeafNode(node) ? "node" : "subtree"))
+              .on("click", d => {
+                menu_object.style("display", "none");
+                this.phylotree.reroot(node);
+                this.update();
+              });
+          }
   
           if (options["hide"]) {
             menu_object
