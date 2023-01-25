@@ -17,7 +17,7 @@ e.append("li").attr("class","divider")),
 F.reroot
 &&
 e.append("li").append("a").attr("tabindex","-1").text("Reroot on this node").on("click",function(n){e.style("display","none"),et.reroot(t).update(reroot_update())})&&
-e.append("li").append("a").attr("tabindex","-1").text("Rotate this "+(l(t)?"node":"subtree")).on("click",function(n){e.style("display","none"),console.log(h(t)),rotate_node(true, t)})),
+e.append("li").append("a").attr("tabindex","-1").text("Rotate this "+(l(t)?"node":"subtree")).on("click",function(n){rotate_node(true, t),e.style("display","none"),console.log("rotating")})),
 
 
 h(t)
