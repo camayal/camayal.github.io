@@ -696,21 +696,31 @@ function sort_nodes (asc) {
 function rotate_node(only_self, this_node) {
   window.tree.resort_children(
     function(node1, node2) {
+      console.log("1 inside first function ", node1, node2)
+      console.log("2 return of  first function ", node2.ordering - node1.ordering)
       return node2.ordering - node1.ordering;
     },
     this_node,
     only_self
       ? function(node) {
+          console.log("3 middle inline function return ", this_node)
           return node == this_node;
         }
       : null
   );
 
-  // if(this_node.children){
-  //   this_node.children.forEach(function(n, i) {
-  //   n.ordering = i;
-  //   });
-  // }
+
+  console.log("4 before order the rotating for all children")
+
+  if(this_node.children){
+    console.log("5 after checking if there are children do ordering for each child", this_node)
+
+    this_node.children.forEach(function(n, i) {
+
+    console.log("6 run for each with 2 parameters n and i", n, i)
+    n.ordering = i;
+    });
+  }
   
 
   setTimeout(function () {
@@ -719,6 +729,11 @@ function rotate_node(only_self, this_node) {
 }, 300);
 
 }
+
+
+
+
+
 
 
 
