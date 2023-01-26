@@ -694,30 +694,33 @@ function sort_nodes (asc) {
 
 // Funtion to rotate a given node
 function rotate_node(only_self, this_node) {
+   // function resortChildren(comparator, start_node, filter) 
   window.tree.resort_children(
+    //comparator
     function(node1, node2) {
-      console.log("1 inside first function ", node1, node2)
-      console.log("2 return of  first function ", node2.ordering - node1.ordering)
+      // console.log("1 inside first function ", node1, node2)
+      // console.log("2 return of  first function ", node2.ordering - node1.ordering)
       return node2.ordering - node1.ordering;
     },
+    //start node
     this_node,
+    //??? filter
     only_self
       ? function(node) {
-          console.log("3 middle inline function return ", this_node)
+          // console.log("3 middle inline function return ", this_node)
           return node == this_node;
         }
       : null
   );
 
-
-  console.log("4 before order the rotating for all children")
+  // console.log("4 before order the rotating for all children")
 
   if(this_node.children){
-    console.log("5 after checking if there are children do ordering for each child", this_node)
+    // console.log("5 after checking if there are children do ordering for each child", this_node)
 
     this_node.children.forEach(function(n, i) {
 
-    console.log("6 run for each with 2 parameters n and i", n, i)
+    // console.log("6 run for each with 2 parameters n and i", n, i)
     n.ordering = i;
     });
   }
@@ -1057,7 +1060,7 @@ Species D,18.721245, -99.240330
 Species E,18.250205, -99.543424`;
     break;
   case 2:
-  newick = "(('Species A':1,'Species B':1)90:3,('Species C':3,('Species D':1, 'Species E':1)100:2)100:1)100;";
+  newick = "(('Species A':1,'Species B':1)90:3,('Species C':3,('Species D':1, 'Species E':1)80:2)70:1)60;";
   latlong = `Species A,18.231141, -97.196820,#ff0000
 Species B,18.365796, -97.355109,red
 Species C,18.875459, -97.793984,blue
