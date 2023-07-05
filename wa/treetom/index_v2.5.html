@@ -557,6 +557,15 @@ else{
 
 }
 
+
+//Redraw on rotate
+map.on('rotate', function(e) {
+    //  console.log("rotate")
+    drawLines_MapPerspective()
+  });
+
+
+	
 // To avoid flickery, just remove lines when zoom starts
 window.map.on('zoomstart', function(e) {
     //  console.log("end")
