@@ -515,6 +515,9 @@ L.control.zoom({
 
 L.rotateControl.setPosition('bottomleft');
 
+window.map.zoomControl.setPosition('bottomright');
+window.map.rotateControl.setPosition('bottomright');
+
 // Add scale to map
 L.control.scale({metric:true, imperial:false, position: 'bottomleft'}).addTo(window.map)
 
