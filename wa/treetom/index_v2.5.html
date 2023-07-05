@@ -332,7 +332,7 @@ cursor:pointer;
       <div class="textAreaColumn">
         <div>Simple tool for visualizing phylogenetic trees onto a map</div>
         
-	      <div id="author"><a href="https://camayal.info">Carlos Alonso Maya-Lastra</a> - 2020</div>
+	      <div id="author"><a href="https://camayal.info">Carlos Alonso Maya-Lastra</a> - 2020-2024 (v2.5)</div>
           
           <div>
             <span>Newick tree</span> 
@@ -464,6 +464,10 @@ window.map = L.map('mapid', {
     layers: [L.esri.basemapLayer("Topographic")],
     zoomControl: false, 
     rotate: true,
+    rotateControl: {
+		    closeOnZeroBearing: false,
+		    position: 'bottomleft',
+		   },
 
 });
 
