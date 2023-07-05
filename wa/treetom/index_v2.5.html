@@ -463,11 +463,7 @@ function drawMap(xyzurl){
 window.map = L.map('mapid', {
     layers: [L.esri.basemapLayer("Topographic")],
     zoomControl: false, 
-	rotate: true,
-	rotateControl: {
-		closeOnZeroBearing: false,
-		// position: 'bottomright',
-	},
+    rotate: true,
 
 });
 
@@ -516,6 +512,8 @@ L.control.zoom({
     position: 'bottomright'
 }).addTo(window.map);
 
+
+L.rotateControl.setPosition('bottomleft');
 
 // Add scale to map
 L.control.scale({metric:true, imperial:false, position: 'bottomleft'}).addTo(window.map)
