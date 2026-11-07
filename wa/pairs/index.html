@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<title>Memoriter</title>
+<style>html,body{margin:0;height:100%;background:#FFF7EA}iframe{display:block;width:100%;height:100%;border:0}</style>
+</head>
+<body>
+<iframe id="game" title="Memoriter" allow="autoplay; fullscreen"></iframe>
+<script>
+  // Shows the game from its own repo, passing along any settings in the address
+  // (so camayal.github.io/wa/memoriter/?lang=es&set=fruits or ?setup work here too).
+  document.getElementById("game").src =
+    "https://camayal.github.io/memoriter/dist/memoriter.html" + location.search;
+</script>
+</body>
+</html>
