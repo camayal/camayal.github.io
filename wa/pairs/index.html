@@ -22,6 +22,8 @@
   // The game lives in the memoriter repo (camayal.info/memoriter/dist/). Settings in the address
   // are passed along, so camayal.info/wa/pairs/?lang=es&set=fruits or ?setup work here too.
   document.getElementById("game").src = "/memoriter/dist/" + location.search;
+  // Offline: this page saves itself (sw.js next to it); the game in the iframe saves itself too.
+  if ("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
 </script>
 </body>
 </html>
