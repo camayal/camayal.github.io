@@ -2,8 +2,9 @@
    It saves this shell page, its manifest and the app icons. The game itself (the iframe at
    /memoriter/dist/) saves itself with its own offline helper, so after one visit online the
    whole thing opens without a connection.
-   The page is fetched from the network first (changes show up right away) and falls back to the
-   saved copy when offline. Change VERSION only if this file's list of files changes. */
+   Everything is served from the saved copy straight away and refreshed in the background, so opening
+   never waits for the network (a weak signal can't slow it down) and changes show up on the next open.
+   Change VERSION only if this file's list of files changes. */
 const VERSION = "1";
 const CACHE = "pairs-shell-" + VERSION;
 const FILES = [
@@ -30,16 +31,16 @@ self.addEventListener("fetch", e => {
   if (req.method !== "GET") return;
   const url = new URL(req.url);
   if (url.origin !== location.origin) return;
-  if (req.mode === "navigate" && url.pathname.startsWith("/wa/pairs/")) {
-    // Network first; offline → the saved shell (works with any ?settings).
-    e.respondWith(fetch(req).then(res => {
-      const copy = res.clone(); caches.open(CACHE).then(c => c.put("/wa/pairs/", copy)); return res;
-    }).catch(() => caches.match("/wa/pairs/")));
-  } else if (FILES.includes(url.pathname)) {
-    // Manifest and icons: from the cache, refreshed in the background.
-    e.respondWith(caches.match(url.pathname).then(hit => {
-      const net = fetch(req).then(res => { if (res.ok) caches.open(CACHE).then(c => c.put(url.pathname, res.clone())); return res; }).catch(() => hit);
-      return hit || net;
-    }));
-  }
+  // The shell page (whatever the ?settings) shares one saved copy; manifest and icons by path.
+  const key = req.mode === "navigate" && url.pathname.startsWith("/wa/pairs/") ? "/wa/pairs/"
+            : FILES.includes(url.pathname) ? url.pathname : null;
+  if (!key) return;
+  const net = fetch(req).then(res => {
+    if (res.ok) { const copy = res.clone(); caches.open(CACHE).then(c => c.put(key, copy)); }
+    return res;
+  });
+  e.respondWith(caches.match(key).then(hit => {
+    if (hit) { e.waitUntil(net.catch(() => {})); return hit; }
+    return net;
+  }));
 });
